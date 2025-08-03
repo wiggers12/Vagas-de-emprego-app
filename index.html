@@ -281,6 +281,7 @@
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutBtn = document.getElementById('logoutBtn');
         const filtroForm = document.getElementById('filtroForm');
+        const vagasContainer = document.getElementById('vagasContainer');
         logoutBtn.addEventListener('click', async () => { await firebase.auth().signOut(); });
         welcomeMessage.textContent = `Olá, ${firebase.auth().currentUser.email}!`;
 
@@ -393,7 +394,6 @@
       let vagasRef = firebase.firestore().collection("vagas");
       
       if (titulo) {
-        // Isso é uma busca parcial, faremos uma checagem simples
         const allDocs = await vagasRef.get();
         const filteredDocs = allDocs.docs.filter(doc => 
           doc.data().titulo.toLowerCase().includes(titulo.toLowerCase()) || 
@@ -589,33 +589,26 @@
         console.error("Erro ao enviar currículo:", error);
       }
     }
-
-    // Funções para a navegação na SPA
-    async function verificarESalvarTipoUsuario(uid, userType) {
-      const userRef = firebase.firestore().collection("usuarios").doc(uid);
-      const userSnap = await userRef.get();
-      if (!userSnap.exists) {
-        await userRef.set({ email: firebase.auth().currentUser.email, tipoUsuario: userType });
-      }
-    }
     
-    async function verificarTipoUsuarioEExibirDashboard(uid) {
+    // Funções para a navegação na SPA
+    function verificarTipoUsuarioEExibirDashboard(uid) {
       const userRef = firebase.firestore().collection("usuarios").doc(uid);
-      const userSnap = await userRef.get();
-      const userType = userSnap.data()?.tipoUsuario || 'candidato';
-      if (userType === 'candidato') {
-        if (window.location.hash === '#perfil') {
-          renderContent(perfilTemplate);
+      userRef.get().then(userSnap => {
+        const userType = userSnap.data()?.tipoUsuario || 'candidato';
+        if (userType === 'candidato') {
+          if (window.location.hash === '#perfil') {
+            renderContent(perfilTemplate);
+          } else {
+            renderContent(candidatoDashboardTemplate);
+          }
         } else {
-          renderContent(candidatoDashboardTemplate);
+          if (window.location.hash === '#meus-candidatos') {
+            renderContent(verCandidatosTemplate);
+          } else {
+            renderContent(empresaDashboardTemplate);
+          }
         }
-      } else {
-        if (window.location.hash === '#meus-candidatos') {
-          renderContent(verCandidatosTemplate);
-        } else {
-          renderContent(empresaDashboardTemplate);
-        }
-      }
+      });
     }
 
     // Lógica de Roteamento para a SPA
