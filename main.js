@@ -1,5 +1,6 @@
 // main.js
 import { auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, storage, ref, uploadBytes, getDownloadURL } from "./firebase.js";
+import { query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const appContainer = document.getElementById('app');
 
@@ -39,6 +40,19 @@ const candidatoDashboardTemplate = `
   </nav>
   <div class="container main-container">
     <h2 class="mb-4">Vagas Disponíveis</h2>
+    <form id="filtroForm" class="mb-4 bg-white p-3 rounded-3 shadow-sm">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input type="text" id="filtroTitulo" class="form-control" placeholder="Buscar por título ou empresa">
+        </div>
+        <div class="col-md-4">
+          <input type="text" id="filtroLocalizacao" class="form-control" placeholder="Buscar por localização">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+      </div>
+    </form>
     <div id="vagasContainer" class="row row-cols-1 g-4">
       </div>
   </div>
@@ -52,13 +66,14 @@ const empresaDashboardTemplate = `
       </a>
       <div class="d-flex align-items-center">
         <span class="me-3" id="welcomeMessage">Olá!</span>
+        <a href="#meus-candidatos" id="meusCandidatosBtn" class="btn btn-secondary me-2">Ver Candidatos</a>
         <button class="btn btn-danger" id="logoutBtn">Sair</button>
       </div>
     </div>
   </nav>
   <div class="container main-container">
     <h2 class="mb-4">Adicionar Nova Vaga</h2>
-    <form id="vagaForm" class="bg-white p-4 rounded-3 shadow-sm">
+    <form id="vagaForm" class="bg-white p-4 rounded-3 shadow-sm mb-5">
       <div class="mb-3">
         <label for="titulo" class="form-label">Título da Vaga</label>
         <input type="text" class="form-control" id="titulo" placeholder="Ex: Desenvolvedor Front-end" required>
@@ -82,6 +97,9 @@ const empresaDashboardTemplate = `
       <button type="submit" class="btn btn-success w-100">Adicionar Vaga</button>
       <div id="statusMessage" class="mt-3 text-center"></div>
     </form>
+    <h3 class="mb-3">Minhas Vagas Publicadas</h3>
+    <div id="minhasVagasContainer" class="row row-cols-1 g-4">
+      </div>
   </div>
 `;
 
@@ -136,7 +154,43 @@ const perfilTemplate = `
   </div>
 `;
 
-// Lógica para renderizar o conteúdo
+const verCandidatosTemplate = `
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container-fluid container main-container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">
+        <h4 class="mb-0">Vagas App (Empresa)</h4>
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="me-3" id="welcomeMessage">Olá!</span>
+        <a href="#dashboard-empresa" id="dashboardEmpresaBtn" class="btn btn-secondary me-2">Dashboard</a>
+        <button class="btn btn-danger" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container main-container">
+    <h2 class="mb-4">Banco de Talentos</h2>
+    <div id="candidatosContainer" class="row row-cols-1 g-4">
+      </div>
+  </div>
+`;
+
+// Lógica de Roteamento para a SPA
+window.addEventListener('hashchange', () => {
+  const user = auth.currentUser;
+  if (!user) { renderContent(loginTemplate); return; }
+  verificarTipoUsuarioEExibirDashboard(user.uid);
+});
+
+// Verifica o estado da autenticação e renderiza a página correta
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    verificarTipoUsuarioEExibirDashboard(user.uid);
+  } else {
+    renderContent(loginTemplate);
+  }
+});
+
+// Lógica de renderização
 function renderContent(template) {
   appContainer.innerHTML = template;
 
@@ -171,21 +225,36 @@ function renderContent(template) {
   } else if (template === candidatoDashboardTemplate) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
+    const filtroForm = document.getElementById('filtroForm');
     const vagasContainer = document.getElementById('vagasContainer');
     logoutBtn.addEventListener('click', async () => { await signOut(auth); });
     welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
+
+    filtroForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const titulo = filtroForm.filtroTitulo.value;
+      const localizacao = filtroForm.filtroLocalizacao.value;
+      carregarVagas(titulo, localizacao);
+    });
+
     carregarVagas();
   } else if (template === empresaDashboardTemplate) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
-    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
-    welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
     const vagaForm = document.getElementById('vagaForm');
     const statusMessage = document.getElementById('statusMessage');
+    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
+    welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
+    
     vagaForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       postarVaga(auth.currentUser.uid, vagaForm, statusMessage);
     });
+    
+    carregarMinhasVagas(auth.currentUser.uid);
+    const meusCandidatosBtn = document.getElementById('meusCandidatosBtn');
+    meusCandidatosBtn.addEventListener('click', () => { window.location.hash = 'meus-candidatos'; });
+
   } else if (template === perfilTemplate) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -197,23 +266,24 @@ function renderContent(template) {
     logoutBtn.addEventListener('click', async () => { await signOut(auth); });
     welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
     carregarPerfil(auth.currentUser.uid, perfilForm, curriculoStatus);
+
     perfilForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       salvarPerfil(auth.currentUser.uid, perfilForm, statusPerfil);
     });
+
     curriculoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       uploadCurriculo(auth.currentUser.uid, curriculoForm, statusCurriculo);
     });
+  } else if (template === verCandidatosTemplate) {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
+    welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
+    carregarCandidatos();
   }
 }
-
-// Lógica de Roteamento para a SPA
-window.addEventListener('hashchange', () => {
-  const user = auth.currentUser;
-  if (!user) { renderContent(loginTemplate); return; }
-  verificarTipoUsuarioEExibirDashboard(user.uid);
-});
 
 // Funções de Autenticação e Usuário
 async function verificarESalvarTipoUsuario(uid, userType) {
@@ -235,43 +305,68 @@ async function verificarTipoUsuarioEExibirDashboard(uid) {
       renderContent(candidatoDashboardTemplate);
     }
   } else {
-    renderContent(empresaDashboardTemplate);
+    if (window.location.hash === '#meus-candidatos') {
+      renderContent(verCandidatosTemplate);
+    } else {
+      renderContent(empresaDashboardTemplate);
+    }
   }
 }
 
 // Funções do Dashboard do Candidato
-async function carregarVagas() {
+async function carregarVagas(titulo = '', localizacao = '') {
   const vagasContainer = document.getElementById('vagasContainer');
   vagasContainer.innerHTML = '<h4 class="text-center">Carregando vagas...</h4>';
+  
+  let vagasQuery = collection(db, "vagas");
+  
+  if (titulo) {
+    // Isso é uma busca parcial, Firebase não suporta, então faremos uma checagem simples
+    const allDocs = await getDocs(vagasQuery);
+    const filteredDocs = allDocs.docs.filter(doc => 
+      doc.data().titulo.toLowerCase().includes(titulo.toLowerCase()) || 
+      doc.data().empresa.toLowerCase().includes(titulo.toLowerCase())
+    );
+    exibirVagas(filteredDocs, vagasContainer);
+    return;
+  }
+  if (localizacao) {
+    vagasQuery = query(vagasQuery, where("localizacao", "==", localizacao));
+  }
+
   try {
-    const querySnapshot = await getDocs(collection(db, "vagas"));
-    vagasContainer.innerHTML = '';
-    if (querySnapshot.empty) {
-      vagasContainer.innerHTML = '<h4 class="text-center">Nenhuma vaga disponível no momento.</h4>';
-      return;
-    }
-    querySnapshot.forEach((doc) => {
-      const vaga = doc.data();
-      const vagaHTML = `
-        <div class="col">
-          <div class="card job-card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">${vaga.titulo}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">${vaga.empresa}</h6>
-              <p class="card-text mb-2">Localização: ${vaga.localizacao}</p>
-              <p class="card-text">Salário: ${vaga.salario || 'A combinar'}</p>
-              <p class="card-text">Descrição: ${vaga.descricao}</p>
-              <button class="btn btn-primary mt-2">Candidatar-se</button>
-            </div>
-          </div>
-        </div>
-      `;
-      vagasContainer.innerHTML += vagaHTML;
-    });
+    const querySnapshot = await getDocs(vagasQuery);
+    exibirVagas(querySnapshot.docs, vagasContainer);
   } catch (error) {
     console.error("Erro ao carregar vagas:", error);
     vagasContainer.innerHTML = '<h4 class="text-center text-danger">Erro ao carregar as vagas.</h4>';
   }
+}
+
+function exibirVagas(docs, container) {
+  container.innerHTML = '';
+  if (docs.length === 0) {
+    container.innerHTML = '<h4 class="text-center">Nenhuma vaga encontrada.</h4>';
+    return;
+  }
+  docs.forEach((doc) => {
+    const vaga = doc.data();
+    const vagaHTML = `
+      <div class="col">
+        <div class="card job-card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">${vaga.titulo}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">${vaga.empresa}</h6>
+            <p class="card-text mb-2">Localização: ${vaga.localizacao}</p>
+            <p class="card-text">Salário: ${vaga.salario || 'A combinar'}</p>
+            <p class="card-text">Descrição: ${vaga.descricao}</p>
+            <button class="btn btn-primary mt-2">Candidatar-se</button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.innerHTML += vagaHTML;
+  });
 }
 
 // Funções do Dashboard da Empresa
@@ -290,9 +385,81 @@ async function postarVaga(uid, vagaForm, statusMessage) {
     await addDoc(collection(db, "vagas"), novaVaga);
     statusMessage.textContent = 'Vaga adicionada com sucesso!';
     vagaForm.reset();
+    carregarMinhasVagas(uid);
   } catch (e) {
     statusMessage.textContent = 'Erro ao adicionar a vaga: ' + e.message;
     console.error("Erro ao adicionar a vaga:", e);
+  }
+}
+
+async function carregarMinhasVagas(uid) {
+  const minhasVagasContainer = document.getElementById('minhasVagasContainer');
+  minhasVagasContainer.innerHTML = '<h4 class="text-center">Carregando suas vagas...</h4>';
+  
+  const vagasQuery = query(collection(db, "vagas"), where("empresaUID", "==", uid));
+  
+  try {
+    const querySnapshot = await getDocs(vagasQuery);
+    minhasVagasContainer.innerHTML = '';
+    if (querySnapshot.empty) {
+      minhasVagasContainer.innerHTML = '<h4 class="text-center">Você ainda não publicou nenhuma vaga.</h4>';
+      return;
+    }
+    
+    querySnapshot.forEach((doc) => {
+      const vaga = doc.data();
+      const vagaHTML = `
+        <div class="col">
+          <div class="card job-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">${vaga.titulo}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">Localização: ${vaga.localizacao}</h6>
+              <p class="card-text">Salário: ${vaga.salario || 'A combinar'}</p>
+              <button class="btn btn-info btn-sm mt-2">Ver Candidatos</button>
+            </div>
+          </div>
+        </div>
+      `;
+      minhasVagasContainer.innerHTML += vagaHTML;
+    });
+  } catch (error) {
+    console.error("Erro ao carregar minhas vagas:", error);
+    minhasVagasContainer.innerHTML = '<h4 class="text-center text-danger">Erro ao carregar suas vagas.</h4>';
+  }
+}
+
+async function carregarCandidatos() {
+  const candidatosContainer = document.getElementById('candidatosContainer');
+  candidatosContainer.innerHTML = '<h4 class="text-center">Carregando banco de talentos...</h4>';
+  const candidatosQuery = query(collection(db, "usuarios"), where("tipoUsuario", "==", "candidato"));
+
+  try {
+    const querySnapshot = await getDocs(candidatosQuery);
+    candidatosContainer.innerHTML = '';
+    if (querySnapshot.empty) {
+      candidatosContainer.innerHTML = '<h4 class="text-center">Nenhum candidato cadastrado.</h4>';
+      return;
+    }
+
+    querySnapshot.forEach(async (doc) => {
+      const candidato = doc.data();
+      const candidatoHTML = `
+        <div class="col">
+          <div class="card job-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">${candidato.nome || 'Nome não preenchido'}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${candidato.localizacao || 'Localização não informada'}</h6>
+              <p class="card-text mb-2">E-mail: ${candidato.email}</p>
+              ${candidato.curriculoURL ? `<a href="${candidato.curriculoURL}" target="_blank" class="btn btn-info btn-sm">Ver Currículo</a>` : `<p class="text-muted">Currículo não enviado.</p>`}
+            </div>
+          </div>
+        </div>
+      `;
+      candidatosContainer.innerHTML += candidatoHTML;
+    });
+  } catch (error) {
+    console.error("Erro ao carregar candidatos:", error);
+    candidatosContainer.innerHTML = '<h4 class="text-center text-danger">Erro ao carregar candidatos.</h4>';
   }
 }
 
@@ -351,11 +518,22 @@ async function uploadCurriculo(uid, curriculoForm, statusCurriculo) {
   }
 }
 
-// Verifica o estado da autenticação e renderiza a página correta
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    verificarTipoUsuarioEExibirDashboard(user.uid);
+// Funções para a navegação na SPA
+async function verificarTipoUsuarioEExibirDashboard(uid) {
+  const userRef = doc(db, "usuarios", uid);
+  const userSnap = await getDoc(userRef);
+  const userType = userSnap.data()?.tipoUsuario || 'candidato';
+  if (userType === 'candidato') {
+    if (window.location.hash === '#perfil') {
+      renderContent(perfilTemplate);
+    } else {
+      renderContent(candidatoDashboardTemplate);
+    }
   } else {
-    renderContent(loginTemplate);
+    if (window.location.hash === '#meus-candidatos') {
+      renderContent(verCandidatosTemplate);
+    } else {
+      renderContent(empresaDashboardTemplate);
+    }
   }
-});
+}
