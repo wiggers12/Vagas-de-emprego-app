@@ -13,17 +13,21 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      padding: 20px;
     }
     .container {
       display: flex;
+      flex-direction: row;
       gap: 30px;
       padding: 20px;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 700px;
     }
     .form-box {
-      width: 300px;
+      flex: 1;
       padding: 20px;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -59,6 +63,15 @@
       margin-top: 15px;
       color: red;
       font-size: 14px;
+    }
+
+    /* Media query para telas menores */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        max-width: 400px;
+        gap: 20px;
+      }
     }
   </style>
 </head>
