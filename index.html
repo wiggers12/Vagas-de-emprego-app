@@ -276,7 +276,7 @@
 
           try {
             const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, senha);
-            await setDoc(db.collection("usuarios").doc(userCredential.user.uid), { 
+            await db.collection("usuarios").doc(userCredential.user.uid).set({ 
               email: userCredential.user.email,
               tipoUsuario: userType 
             });
@@ -352,11 +352,11 @@
 
     // Funções de Autenticação e Usuário
     async function verificarESalvarTipoUsuario(uid, userType) {
-      const userRef = db.collection("usuarios").doc(uid);
+      const userRef = firebase.firestore().collection("usuarios").doc(uid);
       const userSnap = await userRef.get();
       if (!userSnap.exists) {
-        await userRef.set({ email: auth.currentUser.email, tipoUsuario: userType });
-      } else {
+        await userRef.set({ email: firebase.auth().currentUser.email, tipoUsuario: userType });
+      } else { // O usuário já existe, mas o campo pode estar faltando
         if (!userSnap.data().tipoUsuario) {
           await userRef.update({ tipoUsuario: userType });
         }
@@ -364,7 +364,7 @@
     }
     
     async function verificarTipoUsuarioEExibirDashboard(uid) {
-      const userRef = db.collection("usuarios").doc(uid);
+      const userRef = firebase.firestore().collection("usuarios").doc(uid);
       const userSnap = await userRef.get();
       const userType = userSnap.data()?.tipoUsuario || 'candidato';
       if (userType === 'candidato') {
@@ -387,7 +387,7 @@
       const vagasContainer = document.getElementById('vagasContainer');
       vagasContainer.innerHTML = '<h4 class="text-center">Carregando vagas...</h4>';
       
-      let vagasRef = db.collection("vagas");
+      let vagasRef = firebase.firestore().collection("vagas");
       
       if (titulo) {
         const allDocs = await vagasRef.get();
@@ -450,7 +450,7 @@
         candidatos: []
       };
       try {
-        await db.collection("vagas").add(novaVaga);
+        await firebase.firestore().collection("vagas").add(novaVaga);
         statusMessage.textContent = 'Vaga adicionada com sucesso!';
         vagaForm.reset();
         carregarMinhasVagas(uid);
@@ -464,7 +464,7 @@
       const minhasVagasContainer = document.getElementById('minhasVagasContainer');
       minhasVagasContainer.innerHTML = '<h4 class="text-center">Carregando suas vagas...</h4>';
       
-      const vagasRef = db.collection("vagas").where("empresaUID", "==", uid);
+      const vagasRef = firebase.firestore().collection("vagas").where("empresaUID", "==", uid);
       
       try {
         const querySnapshot = await vagasRef.get();
@@ -499,7 +499,7 @@
     async function carregarCandidatos() {
       const candidatosContainer = document.getElementById('candidatosContainer');
       candidatosContainer.innerHTML = '<h4 class="text-center">Carregando banco de talentos...</h4>';
-      const candidatosRef = db.collection("usuarios").where("tipoUsuario", "==", "candidato");
+      const candidatosRef = firebase.firestore().collection("usuarios").where("tipoUsuario", "==", "candidato");
 
       try {
         const querySnapshot = await candidatosRef.get();
@@ -594,10 +594,20 @@
     }
     
     // Funções para a navegação na SPA
-    function verificarTipoUsuarioEExibirDashboard(uid) {
+    function verificarTipoUsuarioEExibirDashboard(uid, userTypeSelected) {
       const userRef = db.collection("usuarios").doc(uid);
       userRef.get().then(userSnap => {
-        const userType = userSnap.data()?.tipoUsuario || 'candidato';
+        let userType;
+        if (userSnap.exists) {
+            userType = userSnap.data()?.tipoUsuario || userTypeSelected;
+        } else {
+            userType = userTypeSelected;
+            db.collection("usuarios").doc(uid).set({ 
+                email: auth.currentUser.email,
+                tipoUsuario: userType 
+            });
+        }
+        
         if (userType === 'candidato') {
           if (window.location.hash === '#perfil') {
             renderContent(perfilTemplate);
@@ -628,13 +638,13 @@
     window.addEventListener('hashchange', () => {
       const user = auth.currentUser;
       if (!user) { renderContent(loginTemplate); return; }
-      verificarTipoUsuarioEExibirDashboard(user.uid);
+      verificarTipoUsuarioEExibirDashboard(user.uid, null);
     });
 
     // Verifica o estado da autenticação e renderiza a página correta
     auth.onAuthStateChanged((user) => {
       if (user) {
-        verificarTipoUsuarioEExibirDashboard(user.uid);
+        verificarTipoUsuarioEExibirDashboard(user.uid, null);
       } else {
         renderContent(loginTemplate);
         const authForm = document.getElementById('authForm');
@@ -645,10 +655,11 @@
         loginBtn.addEventListener('click', async () => {
           const email = authForm.email.value;
           const senha = authForm.senha.value;
+          const userType = authForm.userType.value;
           authMessage.textContent = 'Verificando...';
           try {
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid);
+            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid, userType);
           } catch (error) {
             authMessage.textContent = error.message;
           }
@@ -886,10 +897,20 @@
     }
     
     // Funções para a navegação na SPA
-    function verificarTipoUsuarioEExibirDashboard(uid) {
+    function verificarTipoUsuarioEExibirDashboard(uid, userTypeSelected) {
       const userRef = db.collection("usuarios").doc(uid);
       userRef.get().then(userSnap => {
-        const userType = userSnap.data()?.tipoUsuario || 'candidato';
+        let userType;
+        if (userSnap.exists) {
+            userType = userSnap.data()?.tipoUsuario || userTypeSelected;
+        } else {
+            userType = userTypeSelected;
+            db.collection("usuarios").doc(uid).set({ 
+                email: auth.currentUser.email,
+                tipoUsuario: userType 
+            });
+        }
+        
         if (userType === 'candidato') {
           if (window.location.hash === '#perfil') {
             renderContent(perfilTemplate);
@@ -920,27 +941,28 @@
     window.addEventListener('hashchange', () => {
       const user = auth.currentUser;
       if (!user) { renderContent(loginTemplate); return; }
-      verificarTipoUsuarioEExibirDashboard(user.uid);
+      verificarTipoUsuarioEExibirDashboard(user.uid, null);
     });
 
     // Verifica o estado da autenticação e renderiza a página correta
     auth.onAuthStateChanged((user) => {
       if (user) {
-        verificarTipoUsuarioEExibirDashboard(user.uid);
+        verificarTipoUsuarioEExibirDashboard(user.uid, null);
       } else {
         renderContent(loginTemplate);
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
         const authForm = document.getElementById('authForm');
         const authMessage = document.getElementById('authMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
 
         loginBtn.addEventListener('click', async () => {
           const email = authForm.email.value;
           const senha = authForm.senha.value;
+          const userType = authForm.userType.value;
           authMessage.textContent = 'Verificando...';
           try {
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid);
+            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid, userType);
           } catch (error) {
             authMessage.textContent = error.message;
           }
