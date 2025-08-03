@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login e Cadastro - Vagas App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      display: flex;
+      gap: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .form-box {
+      width: 300px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      color: red;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <h2>Criar Conta</h2>
+      <form id="cadastroForm">
+        <input type="email" id="cadastroEmail" placeholder="E-mail" required>
+        <input type="password" id="cadastroSenha" placeholder="Senha" required>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <p class="message" id="cadastroMessage"></p>
+    </div>
+
+    <div class="form-box">
+      <h2>Entrar</h2>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="E-mail" required>
+        <input type="password" id="loginSenha" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+      </form>
+      <p class="message" id="loginMessage"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "./firebase.js";
+
+    const cadastroForm = document.getElementById('cadastroForm');
+    const loginForm = document.getElementById('loginForm');
+    const cadastroMessage = document.getElementById('cadastroMessage');
+    const loginMessage = document.getElementById('loginMessage');
+
+    // Lógica de Cadastro
+    cadastroForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = cadastroForm.cadastroEmail.value;
+      const senha = cadastroForm.cadastroSenha.value;
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, senha);
+        cadastroMessage.textContent = 'Usuário cadastrado com sucesso!';
+        // Redirecionar para o dashboard de candidato após o cadastro
+        window.location.href = 'dashboard-candidato.html'; 
+      } catch (error) {
+        cadastroMessage.textContent = error.message;
+      }
+    });
+
+    // Lógica de Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = loginForm.loginEmail.value;
+      const senha = loginForm.loginSenha.value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, senha);
+        loginMessage.textContent = 'Login efetuado com sucesso!';
+        // Redirecionar para o dashboard de candidato após o login
+        window.location.href = 'dashboard-candidato.html';
+      } catch (error) {
+        loginMessage.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>
