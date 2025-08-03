@@ -23,12 +23,12 @@
     .card-login h2 {
       color: #00ff88;
     }
-    .card-login input {
+    .card-login input, .card-login select {
       background-color: #333333;
       border: 1px solid #555555;
       color: #f0f2f5;
     }
-    .card-login input::placeholder {
+    .card-login input::placeholder, .card-login select {
       color: #999999;
     }
     .btn-custom-success {
@@ -264,7 +264,7 @@
 
           try {
             const userCredential = await firebase.auth().signInWithEmailAndPassword(email, senha);
-            await verificarESalvarTipoUsuario(userCredential.user.uid, userType);
+            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid, userType);
           } catch (error) {
             authMessage.textContent = error.message;
           }
@@ -368,17 +368,7 @@
     async function verificarTipoUsuarioEExibirDashboard(uid, userTypeSelected) {
       const userRef = db.collection("usuarios").doc(uid);
       userRef.get().then(userSnap => {
-        let userType;
-        if (userSnap.exists) {
-          userType = userSnap.data()?.tipoUsuario || userTypeSelected;
-        } else {
-          userType = userTypeSelected;
-          db.collection("usuarios").doc(uid).set({ 
-            email: auth.currentUser.email,
-            tipoUsuario: userType 
-          });
-        }
-        
+        let userType = userSnap.data()?.tipoUsuario || userTypeSelected;
         if (userType === 'candidato') {
           if (window.location.hash === '#perfil') {
             renderContent(perfilTemplate);
@@ -404,21 +394,57 @@
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
       });
     }
+
     // Lógica de Roteamento para a SPA
     window.addEventListener('hashchange', () => {
-      const user = firebase.auth().currentUser;
+      const user = auth.currentUser;
       if (!user) { renderContent(loginTemplate); return; }
       const userTypeSelected = document.getElementById('userType')?.value;
       verificarTipoUsuarioEExibirDashboard(user.uid, userTypeSelected);
     });
 
     // Verifica o estado da autenticação e renderiza a página correta
-    firebase.auth().onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user) => {
       if (user) {
         const userTypeSelected = document.getElementById('userType')?.value;
         verificarTipoUsuarioEExibirDashboard(user.uid, userTypeSelected);
       } else {
         renderContent(loginTemplate);
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const authForm = document.getElementById('authForm');
+        const authMessage = document.getElementById('authMessage');
+
+        loginBtn.addEventListener('click', async () => {
+          const email = authForm.email.value;
+          const senha = authForm.senha.value;
+          const userType = authForm.userType.value;
+          authMessage.textContent = 'Verificando...';
+          try {
+            const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid, userType);
+          } catch (error) {
+            authMessage.textContent = error.message;
+          }
+        });
+
+        registerBtn.addEventListener('click', async () => {
+          const email = authForm.email.value;
+          const senha = authForm.senha.value;
+          const userType = authForm.userType.value;
+          authMessage.textContent = 'Cadastrando...';
+          try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+            await db.collection("usuarios").doc(userCredential.user.uid).set({ 
+              email: userCredential.user.email,
+              tipoUsuario: userType 
+            });
+            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid);
+            authMessage.textContent = 'Conta criada com sucesso!';
+          } catch (error) {
+            authMessage.textContent = error.message;
+          }
+        });
       }
     });
 
@@ -490,7 +516,7 @@
         candidatos: []
       };
       try {
-        await db.collection("vagas").add(novaVaga);
+        await firebase.firestore().collection("vagas").add(novaVaga);
         statusMessage.textContent = 'Vaga adicionada com sucesso!';
         vagaForm.reset();
         carregarMinhasVagas(uid);
@@ -633,62 +659,38 @@
       }
     }
     
-    // Lógica de Autenticação e Redirecionamento
-    function verificarTipoUsuarioEExibirDashboard(uid, userTypeSelected = null) {
-      const userRef = db.collection("usuarios").doc(uid);
-      userRef.get().then(userSnap => {
-        let userType = userSnap.data()?.tipoUsuario;
-        if (!userSnap.exists || !userType) {
-            userType = userTypeSelected;
-            if (userType) {
-              db.collection("usuarios").doc(uid).set({ 
-                email: auth.currentUser.email,
-                tipoUsuario: userType 
-              });
-            } else {
-              userType = 'candidato';
-            }
-        }
-        
-        if (userType === 'candidato') {
-          if (window.location.hash === '#perfil') {
-            renderContent(perfilTemplate);
-            document.getElementById('perfilForm').addEventListener('submit', async (e) => { e.preventDefault(); salvarPerfil(uid); });
-            document.getElementById('curriculoForm').addEventListener('submit', async (e) => { e.preventDefault(); uploadCurriculo(uid); });
-            carregarPerfil(uid);
-          } else {
-            renderContent(candidatoDashboardTemplate);
-            document.getElementById('filtroForm').addEventListener('submit', async (e) => { e.preventDefault(); carregarVagas(e.target.filtroTitulo.value, e.target.filtroLocalizacao.value); });
-            carregarVagas();
-          }
-        } else {
-          if (window.location.hash === '#meus-candidatos') {
-            renderContent(verCandidatosTemplate);
-            carregarCandidatos();
-          } else {
-            renderContent(empresaDashboardTemplate);
-            document.getElementById('vagaForm').addEventListener('submit', async (e) => { e.preventDefault(); postarVaga(uid, e.target, document.getElementById('statusMessage')); });
-            carregarMinhasVagas(uid);
-          }
-        }
-        document.getElementById('welcomeMessage').textContent = `Olá, ${auth.currentUser.email}!`;
-        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
-      });
-    }
-
-    // Lógica de Roteamento para a SPA
-    window.addEventListener('hashchange', () => {
+    // Lógica de navegação e autenticação
+    function setupEventListeners() {
+      const appHash = window.location.hash || '#dashboard';
       const user = auth.currentUser;
-      if (!user) { renderContent(loginTemplate); return; }
-      const userTypeSelected = document.getElementById('userType')?.value;
-      verificarTipoUsuarioEExibirDashboard(user.uid, userTypeSelected);
-    });
 
-    // Verifica o estado da autenticação e renderiza a página correta
-    auth.onAuthStateChanged((user) => {
       if (user) {
-        const userTypeSelected = document.getElementById('userType')?.value;
-        verificarTipoUsuarioEExibirDashboard(user.uid, userTypeSelected);
+        db.collection("usuarios").doc(user.uid).get().then(userSnap => {
+          let userType = userSnap.data()?.tipoUsuario || 'candidato';
+          if (userType === 'candidato') {
+            if (appHash === '#perfil') {
+              renderContent(perfilTemplate);
+              document.getElementById('perfilForm').addEventListener('submit', async (e) => { e.preventDefault(); salvarPerfil(user.uid); });
+              document.getElementById('curriculoForm').addEventListener('submit', async (e) => { e.preventDefault(); uploadCurriculo(user.uid); });
+              carregarPerfil(user.uid);
+            } else {
+              renderContent(candidatoDashboardTemplate);
+              document.getElementById('filtroForm').addEventListener('submit', async (e) => { e.preventDefault(); carregarVagas(e.target.filtroTitulo.value, e.target.filtroLocalizacao.value); });
+              carregarVagas();
+            }
+          } else { // userType === 'empresa'
+            if (appHash === '#meus-candidatos') {
+              renderContent(verCandidatosTemplate);
+              carregarCandidatos();
+            } else {
+              renderContent(empresaDashboardTemplate);
+              document.getElementById('vagaForm').addEventListener('submit', async (e) => { e.preventDefault(); postarVaga(user.uid, e.target, document.getElementById('statusMessage')); });
+              carregarMinhasVagas(user.uid);
+            }
+          }
+          document.getElementById('welcomeMessage').textContent = `Olá, ${user.email}!`;
+          document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+        });
       } else {
         renderContent(loginTemplate);
         const loginBtn = document.getElementById('loginBtn');
@@ -702,8 +704,7 @@
           const userType = authForm.userType.value;
           authMessage.textContent = 'Verificando...';
           try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid, userType);
+            await auth.signInWithEmailAndPassword(email, senha);
           } catch (error) {
             authMessage.textContent = error.message;
           }
@@ -720,14 +721,32 @@
               email: userCredential.user.email,
               tipoUsuario: userType 
             });
-            verificarTipoUsuarioEExibirDashboard(userCredential.user.uid);
             authMessage.textContent = 'Conta criada com sucesso!';
           } catch (error) {
             authMessage.textContent = error.message;
           }
         });
       }
+    }
+
+    // Gerenciamento de estado e evento de hash
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        setupEventListeners();
+      } else {
+        renderContent(loginTemplate);
+        setupEventListeners();
+      }
     });
+
+    window.addEventListener('hashchange', () => {
+      if (auth.currentUser) {
+        setupEventListeners();
+      }
+    });
+
+    // Função de logout para uso em onclick
+    window.logout = () => auth.signOut();
   </script>
 </body>
 </html>
