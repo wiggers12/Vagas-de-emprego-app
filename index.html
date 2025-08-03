@@ -281,7 +281,6 @@
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutBtn = document.getElementById('logoutBtn');
         const filtroForm = document.getElementById('filtroForm');
-        const vagasContainer = document.getElementById('vagasContainer');
         logoutBtn.addEventListener('click', async () => { await firebase.auth().signOut(); });
         welcomeMessage.textContent = `Olá, ${firebase.auth().currentUser.email}!`;
 
@@ -296,9 +295,9 @@
       } else if (template === empresaDashboardTemplate) {
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutBtn = document.getElementById('logoutBtn');
-        const meusCandidatosBtn = document.getElementById('meusCandidatosBtn');
         const vagaForm = document.getElementById('vagaForm');
         const statusMessage = document.getElementById('statusMessage');
+        const meusCandidatosBtn = document.getElementById('meusCandidatosBtn');
         logoutBtn.addEventListener('click', async () => { await firebase.auth().signOut(); });
         welcomeMessage.textContent = `Olá, ${firebase.auth().currentUser.email}!`;
         
@@ -309,6 +308,7 @@
         
         carregarMinhasVagas(firebase.auth().currentUser.uid);
         meusCandidatosBtn.addEventListener('click', () => { window.location.hash = 'meus-candidatos'; });
+
       } else if (template === perfilTemplate) {
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutBtn = document.getElementById('logoutBtn');
@@ -333,7 +333,9 @@
       } else if (template === verCandidatosTemplate) {
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutBtn = document.getElementById('logoutBtn');
+        const dashboardEmpresaBtn = document.getElementById('dashboardEmpresaBtn');
         logoutBtn.addEventListener('click', async () => { await firebase.auth().signOut(); });
+        dashboardEmpresaBtn.addEventListener('click', () => { window.location.hash = 'dashboard-empresa'; });
         welcomeMessage.textContent = `Olá, ${firebase.auth().currentUser.email}!`;
         carregarCandidatos();
       }
@@ -587,6 +589,50 @@
         console.error("Erro ao enviar currículo:", error);
       }
     }
+
+    // Funções para a navegação na SPA
+    async function verificarESalvarTipoUsuario(uid, userType) {
+      const userRef = firebase.firestore().collection("usuarios").doc(uid);
+      const userSnap = await userRef.get();
+      if (!userSnap.exists) {
+        await userRef.set({ email: firebase.auth().currentUser.email, tipoUsuario: userType });
+      }
+    }
+    
+    async function verificarTipoUsuarioEExibirDashboard(uid) {
+      const userRef = firebase.firestore().collection("usuarios").doc(uid);
+      const userSnap = await userRef.get();
+      const userType = userSnap.data()?.tipoUsuario || 'candidato';
+      if (userType === 'candidato') {
+        if (window.location.hash === '#perfil') {
+          renderContent(perfilTemplate);
+        } else {
+          renderContent(candidatoDashboardTemplate);
+        }
+      } else {
+        if (window.location.hash === '#meus-candidatos') {
+          renderContent(verCandidatosTemplate);
+        } else {
+          renderContent(empresaDashboardTemplate);
+        }
+      }
+    }
+
+    // Lógica de Roteamento para a SPA
+    window.addEventListener('hashchange', () => {
+      const user = firebase.auth().currentUser;
+      if (!user) { renderContent(loginTemplate); return; }
+      verificarTipoUsuarioEExibirDashboard(user.uid);
+    });
+
+    // Verifica o estado da autenticação e renderiza a página correta
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        verificarTipoUsuarioEExibirDashboard(user.uid);
+      } else {
+        renderContent(loginTemplate);
+      }
+    });
   </script>
 </body>
 </html>
