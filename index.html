@@ -88,7 +88,8 @@
               </select>
               <input type="email" id="email" class="form-control mb-3" placeholder="E-mail" required>
               <input type="password" id="senha" class="form-control mb-3" placeholder="Senha" required>
-              <button type="submit" class="btn btn-custom-success w-100">Entrar / Cadastrar</button>
+              <button type="button" id="loginBtn" class="btn btn-custom-success w-100 mb-2">Entrar</button>
+              <button type="button" id="registerBtn" class="btn btn-primary w-100">Cadastrar</button>
             </div>
           </form>
           <p class="text-center mt-3 text-danger" id="authMessage"></p>
@@ -252,29 +253,33 @@
       if (template === loginTemplate) {
         const authForm = document.getElementById('authForm');
         const authMessage = document.getElementById('authMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
 
-        authForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
+        loginBtn.addEventListener('click', async () => {
           const email = authForm.email.value;
           const senha = authForm.senha.value;
-          const userType = authForm.userType.value;
           authMessage.textContent = 'Verificando...';
 
           try {
             const userCredential = await firebase.auth().signInWithEmailAndPassword(email, senha);
-            verificarESalvarTipoUsuario(userCredential.user.uid, userType);
-          } catch (loginError) {
-            if (loginError.code === 'auth/user-not-found') {
-              try {
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, senha);
-                verificarESalvarTipoUsuario(userCredential.user.uid, userType);
-                authMessage.textContent = 'Conta criada com sucesso!';
-              } catch (registerError) {
-                authMessage.textContent = registerError.message;
-              }
-            } else {
-              authMessage.textContent = loginError.message;
-            }
+            verificarESalvarTipoUsuario(userCredential.user.uid, authForm.userType.value);
+          } catch (error) {
+            authMessage.textContent = error.message;
+          }
+        });
+
+        registerBtn.addEventListener('click', async () => {
+          const email = authForm.email.value;
+          const senha = authForm.senha.value;
+          authMessage.textContent = 'Cadastrando...';
+
+          try {
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, senha);
+            verificarESalvarTipoUsuario(userCredential.user.uid, authForm.userType.value);
+            authMessage.textContent = 'Conta criada com sucesso!';
+          } catch (error) {
+            authMessage.textContent = error.message;
           }
         });
       } else if (template === candidatoDashboardTemplate) {
