@@ -513,7 +513,7 @@
           return;
         }
 
-        querySnapshot.forEach(async (doc) => {
+        querySnapshot.forEach((doc) => {
           const candidato = doc.data();
           const candidatoHTML = `
             <div class="col">
