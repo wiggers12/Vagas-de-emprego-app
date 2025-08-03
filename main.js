@@ -1,5 +1,5 @@
 // main.js
-import { auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, collection, getDocs } from "./firebase.js";
+import { auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, collection, getDocs, doc, getDoc, setDoc, updateDoc, storage, ref, uploadBytes, getDownloadURL } from "./firebase.js";
 
 const appContainer = document.getElementById('app');
 
@@ -27,7 +27,7 @@ const dashboardTemplate = `
       </a>
       <div class="d-flex align-items-center">
         <span class="me-3" id="welcomeMessage">Olá!</span>
-        <a href="#perfil" class="btn btn-secondary me-2">Meu Perfil</a>
+        <a href="#perfil" id="perfilBtn" class="btn btn-secondary me-2">Meu Perfil</a>
         <button class="btn btn-danger" id="logoutBtn">Sair</button>
       </div>
     </div>
@@ -39,6 +39,58 @@ const dashboardTemplate = `
   </div>
 `;
 
+const perfilTemplate = `
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container-fluid container main-container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">
+        <h4 class="mb-0">Vagas App</h4>
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="me-3" id="welcomeMessage">Olá!</span>
+        <a href="#dashboard" id="dashboardBtn" class="btn btn-secondary me-2">Dashboard</a>
+        <button class="btn btn-danger" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container main-container mt-4">
+    <div class="card shadow-sm profile-card">
+      <h2 class="text-center mb-4">Meu Perfil</h2>
+      <form id="perfilForm">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome Completo</label>
+          <input type="text" class="form-control" id="nome" required>
+        </div>
+        <div class="mb-3">
+          <label for="telefone" class="form-label">Telefone</label>
+          <input type="tel" class="form-control" id="telefone">
+        </div>
+        <div class="mb-3">
+          <label for="localizacao" class="form-label">Localização</label>
+          <input type="text" class="form-control" id="localizacao">
+        </div>
+        <div class="mb-3">
+          <label for="sobreMim" class="form-label">Sobre Mim</label>
+          <textarea class="form-control" id="sobreMim" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success w-100 mb-3">Salvar Perfil</button>
+        <div id="statusPerfil" class="mt-2 text-center"></div>
+      </form>
+      <hr class="my-4">
+      <h3 class="mb-3">Currículo</h3>
+      <div id="curriculoStatus" class="mb-3"></div>
+      <form id="curriculoForm">
+        <div class="mb-3">
+          <label for="curriculoFile" class="form-label">Upload de Currículo</label>
+          <input type="file" class="form-control" id="curriculoFile" accept=".pdf,.doc,.docx">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Upload Currículo</button>
+        <div id="statusCurriculo" class="mt-2 text-center"></div>
+      </form>
+    </div>
+  </div>
+`;
+
+// Lógica para renderizar o conteúdo
 function renderContent(template) {
   appContainer.innerHTML = template;
 
@@ -71,6 +123,7 @@ function renderContent(template) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     const vagasContainer = document.getElementById('vagasContainer');
+    const perfilBtn = document.getElementById('perfilBtn');
 
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
@@ -78,9 +131,44 @@ function renderContent(template) {
 
     welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
     carregarVagas();
+  } else if (template === perfilTemplate) {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const perfilForm = document.getElementById('perfilForm');
+    const curriculoForm = document.getElementById('curriculoForm');
+    const statusPerfil = document.getElementById('statusPerfil');
+    const statusCurriculo = document.getElementById('statusCurriculo');
+    const curriculoStatus = document.getElementById('curriculoStatus');
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+    });
+    welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
+    carregarPerfil(auth.currentUser.uid, perfilForm, statusCurriculo, curriculoStatus);
+
+    perfilForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      salvarPerfil(auth.currentUser.uid, perfilForm, statusPerfil);
+    });
+
+    curriculoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      uploadCurriculo(auth.currentUser.uid, curriculoForm, statusCurriculo);
+    });
   }
 }
 
+// Lógica de Roteamento para a SPA
+window.addEventListener('hashchange', () => {
+  if (window.location.hash === '#perfil') {
+    renderContent(perfilTemplate);
+  } else {
+    renderContent(dashboardTemplate);
+  }
+});
+
+
+// Funções do Dashboard
 async function carregarVagas() {
   const vagasContainer = document.getElementById('vagasContainer');
   vagasContainer.innerHTML = '<h4 class="text-center">Carregando vagas...</h4>';
@@ -110,16 +198,78 @@ async function carregarVagas() {
       `;
       vagasContainer.innerHTML += vagaHTML;
     });
-
   } catch (error) {
     console.error("Erro ao carregar vagas:", error);
     vagasContainer.innerHTML = '<h4 class="text-center text-danger">Erro ao carregar as vagas.</h4>';
   }
 }
 
+// Funções do Perfil
+async function carregarPerfil(uid, perfilForm, statusCurriculo, curriculoStatus) {
+  const userRef = doc(db, "usuarios", uid);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    const data = userSnap.data();
+    perfilForm.nome.value = data.nome || '';
+    perfilForm.telefone.value = data.telefone || '';
+    perfilForm.localizacao.value = data.localizacao || '';
+    perfilForm.sobreMim.value = data.sobreMim || '';
+    if (data.curriculoURL) {
+      curriculoStatus.innerHTML = `<p>Currículo atual: <a href="${data.curriculoURL}" target="_blank">Ver</a></p>`;
+    }
+  } else {
+    await setDoc(userRef, { email: auth.currentUser.email });
+  }
+}
+
+async function salvarPerfil(uid, perfilForm, statusPerfil) {
+  statusPerfil.textContent = 'Salvando perfil...';
+  const userRef = doc(db, "usuarios", uid);
+  try {
+    await updateDoc(userRef, {
+      nome: perfilForm.nome.value,
+      telefone: perfilForm.telefone.value,
+      localizacao: perfilForm.localizacao.value,
+      sobreMim: perfilForm.sobreMim.value
+    });
+    statusPerfil.textContent = 'Perfil salvo com sucesso!';
+  } catch (error) {
+    statusPerfil.textContent = 'Erro ao salvar o perfil.';
+    console.error("Erro ao salvar perfil:", error);
+  }
+}
+
+async function uploadCurriculo(uid, curriculoForm, statusCurriculo) {
+  const file = curriculoForm.curriculoFile.files[0];
+  if (!file) {
+    statusCurriculo.textContent = 'Por favor, selecione um arquivo.';
+    return;
+  }
+  statusCurriculo.textContent = 'Enviando currículo...';
+  const storageRef = ref(storage, `curriculos/${uid}/${file.name}`);
+  const userRef = doc(db, "usuarios", uid);
+
+  try {
+    const uploadTask = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(uploadTask.ref);
+    await updateDoc(userRef, { curriculoURL: url });
+    statusCurriculo.innerHTML = `Currículo enviado com sucesso! <a href="${url}" target="_blank">Ver</a>`;
+  } catch (error) {
+    statusCurriculo.textContent = 'Erro ao enviar o currículo.';
+    console.error("Erro ao enviar currículo:", error);
+  }
+}
+
+
+// Verifica o estado da autenticação do usuário e renderiza a página correta
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    renderContent(dashboardTemplate);
+    if (window.location.hash === '#perfil') {
+      renderContent(perfilTemplate);
+    } else {
+      renderContent(dashboardTemplate);
+    }
   } else {
     renderContent(loginTemplate);
   }
