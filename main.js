@@ -7,25 +7,16 @@ const appContainer = document.getElementById('app');
 
 const loginTemplate = `
   <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="d-flex flex-column flex-md-row gap-3 p-4 card-login">
-      <div class="form-box border rounded-3 p-4">
-        <h2 class="text-center mb-4">Criar Conta</h2>
-        <form id="cadastroForm">
-          <input type="email" id="cadastroEmail" class="form-control mb-3" placeholder="E-mail" required>
-          <input type="password" id="cadastroSenha" class="form-control mb-3" placeholder="Senha" required>
-          <button type="submit" class="btn btn-custom-success w-100">Cadastrar</button>
-        </form>
-        <p class="text-center mt-3 text-danger" id="cadastroMessage"></p>
-      </div>
-      <div class="form-box border rounded-3 p-4">
-        <h2 class="text-center mb-4">Entrar</h2>
-        <form id="loginForm">
-          <input type="email" id="loginEmail" class="form-control mb-3" placeholder="E-mail" required>
-          <input type="password" id="loginSenha" class="form-control mb-3" placeholder="Senha" required>
-          <button type="submit" class="btn btn-custom-success w-100">Entrar</button>
-        </form>
-        <p class="text-center mt-3 text-danger" id="loginMessage"></p>
-      </div>
+    <div class="card-login p-4">
+      <h2 class="text-center mb-4">Acessar Vagas App</h2>
+      <form id="authForm">
+        <div class="form-box border rounded-3 p-4">
+          <input type="email" id="email" class="form-control mb-3" placeholder="E-mail" required>
+          <input type="password" id="senha" class="form-control mb-3" placeholder="Senha" required>
+          <button type="submit" class="btn btn-custom-success w-100">Entrar / Cadastrar</button>
+        </div>
+      </form>
+      <p class="text-center mt-3 text-danger" id="authMessage"></p>
     </div>
   </div>
 `;
@@ -55,32 +46,29 @@ function renderContent(template) {
   appContainer.innerHTML = template;
 
   if (template === loginTemplate) {
-    // Lógica para os formulários de login e cadastro
-    const cadastroForm = document.getElementById('cadastroForm');
-    const loginForm = document.getElementById('loginForm');
-    const cadastroMessage = document.getElementById('cadastroMessage');
-    const loginMessage = document.getElementById('loginMessage');
+    const authForm = document.getElementById('authForm');
+    const authMessage = document.getElementById('authMessage');
 
-    cadastroForm.addEventListener('submit', async (e) => {
+    authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = cadastroForm.cadastroEmail.value;
-      const senha = cadastroForm.cadastroSenha.value;
-      try {
-        await createUserWithEmailAndPassword(auth, email, senha);
-        cadastroMessage.textContent = 'Usuário cadastrado com sucesso!';
-      } catch (error) {
-        cadastroMessage.textContent = error.message;
-      }
-    });
+      const email = authForm.email.value;
+      const senha = authForm.senha.value;
+      authMessage.textContent = 'Verificando...';
 
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = loginForm.loginEmail.value;
-      const senha = loginForm.loginSenha.value;
       try {
         await signInWithEmailAndPassword(auth, email, senha);
-      } catch (error) {
-        loginMessage.textContent = error.message;
+        authMessage.textContent = ''; // Limpa a mensagem de sucesso ao ser redirecionado
+      } catch (loginError) {
+        if (loginError.code === 'auth/user-not-found') {
+          try {
+            await createUserWithEmailAndPassword(auth, email, senha);
+            authMessage.textContent = 'Conta criada com sucesso!';
+          } catch (registerError) {
+            authMessage.textContent = registerError.message;
+          }
+        } else {
+          authMessage.textContent = loginError.message;
+        }
       }
     });
   } else if (template === dashboardTemplate) {
