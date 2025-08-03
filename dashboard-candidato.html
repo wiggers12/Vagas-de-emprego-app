@@ -36,7 +36,7 @@
           <h4 class="mb-0">Vagas App</h4>
         </a>
         <div class="d-flex align-items-center">
-          <span class="me-3" id="welcomeMessage">Olá, Candidato!</span>
+          <span class="me-3" id="welcomeMessage">Olá!</span>
           <button class="btn btn-danger" id="logoutBtn">Sair</button>
         </div>
       </div>
@@ -46,47 +46,61 @@
   <div class="container main-container">
     <h2 class="mb-4">Vagas Disponíveis</h2>
     <div id="vagasContainer" class="row row-cols-1 g-4">
-      <div class="col">
-        <div class="card job-card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Desenvolvedor Front-end Pleno</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Empresa Fictícia S.A.</h6>
-            <p class="card-text mb-2">Localização: Remoto</p>
-            <p class="card-text">Salário: R$ 5.000 - R$ 7.000</p>
-            <p class="card-text">Descrição: Vaga para trabalhar com React, Vue.js e JavaScript em projetos de grande escala.</p>
-            <button class="btn btn-primary mt-2">Candidatar-se</button>
-          </div>
-        </div>
       </div>
-      <div class="col">
-        <div class="card job-card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Analista de Marketing Digital</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Agência Criativa Ltda.</h6>
-            <p class="card-text mb-2">Localização: São Paulo, SP</p>
-            <p class="card-text">Salário: A combinar</p>
-            <p class="card-text">Descrição: Experiência em campanhas de Google Ads e redes sociais. Análise de métricas e SEO.</p>
-            <button class="btn btn-primary mt-2">Candidatar-se</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script type="module">
-    import { auth } from "./firebase.js";
+    import { auth, db } from "./firebase.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
+    const vagasContainer = document.getElementById('vagasContainer');
+
+    // Função para carregar as vagas do Firestore
+    async function carregarVagas() {
+      vagasContainer.innerHTML = '<h4>Carregando vagas...</h4>';
+      try {
+        const querySnapshot = await getDocs(collection(db, "vagas"));
+        vagasContainer.innerHTML = '';
+        if (querySnapshot.empty) {
+          vagasContainer.innerHTML = '<h4>Nenhuma vaga disponível no momento.</h4>';
+          return;
+        }
+        
+        querySnapshot.forEach((doc) => {
+          const vaga = doc.data();
+          const vagaHTML = `
+            <div class="col">
+              <div class="card job-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">${vaga.titulo}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">${vaga.empresa}</h6>
+                  <p class="card-text mb-2">Localização: ${vaga.localizacao}</p>
+                  <p class="card-text">Salário: ${vaga.salario || 'A combinar'}</p>
+                  <p class="card-text">Descrição: ${vaga.descricao}</p>
+                  <button class="btn btn-primary mt-2">Candidatar-se</button>
+                </div>
+              </div>
+            </div>
+          `;
+          vagasContainer.innerHTML += vagaHTML;
+        });
+
+      } catch (error) {
+        console.error("Erro ao carregar vagas:", error);
+        vagasContainer.innerHTML = '<h4>Erro ao carregar as vagas.</h4>';
+      }
+    }
 
     // Verifica se o usuário está logado
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Se o usuário está logado, atualiza a mensagem de boas-vindas
         welcomeMessage.textContent = `Olá, ${user.email}!`;
+        // Carrega as vagas após o usuário ser autenticado
+        carregarVagas();
       } else {
-        // Se não há usuário, redireciona para a página de login
         window.location.href = 'auth.html';
       }
     });
@@ -101,5 +115,6 @@
       }
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
