@@ -364,6 +364,10 @@
       const userSnap = await userRef.get();
       if (!userSnap.exists) {
         await userRef.set({ email: firebase.auth().currentUser.email, tipoUsuario: userType });
+      } else { // O usuário já existe, mas o campo pode estar faltando
+        if (!userSnap.data().tipoUsuario) {
+          await userRef.update({ tipoUsuario: userType });
+        }
       }
     }
     
