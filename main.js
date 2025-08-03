@@ -1,5 +1,5 @@
 // main.js
-import { auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, collection, getDocs, doc, getDoc, setDoc, updateDoc, storage, ref, uploadBytes, getDownloadURL } from "./firebase.js";
+import { auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, storage, ref, uploadBytes, getDownloadURL } from "./firebase.js";
 
 const appContainer = document.getElementById('app');
 
@@ -9,6 +9,11 @@ const loginTemplate = `
       <h2 class="text-center mb-4">Acessar Vagas App</h2>
       <form id="authForm">
         <div class="form-box border rounded-3 p-4">
+          <label for="userType" class="form-label">Você é:</label>
+          <select id="userType" class="form-select mb-3">
+            <option value="candidato">Candidato</option>
+            <option value="empresa">Empresa</option>
+          </select>
           <input type="email" id="email" class="form-control mb-3" placeholder="E-mail" required>
           <input type="password" id="senha" class="form-control mb-3" placeholder="Senha" required>
           <button type="submit" class="btn btn-custom-success w-100">Entrar / Cadastrar</button>
@@ -19,7 +24,7 @@ const loginTemplate = `
   </div>
 `;
 
-const dashboardTemplate = `
+const candidatoDashboardTemplate = `
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid container main-container d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="#">
@@ -36,6 +41,47 @@ const dashboardTemplate = `
     <h2 class="mb-4">Vagas Disponíveis</h2>
     <div id="vagasContainer" class="row row-cols-1 g-4">
       </div>
+  </div>
+`;
+
+const empresaDashboardTemplate = `
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container-fluid container main-container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">
+        <h4 class="mb-0">Vagas App (Empresa)</h4>
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="me-3" id="welcomeMessage">Olá!</span>
+        <button class="btn btn-danger" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container main-container">
+    <h2 class="mb-4">Adicionar Nova Vaga</h2>
+    <form id="vagaForm" class="bg-white p-4 rounded-3 shadow-sm">
+      <div class="mb-3">
+        <label for="titulo" class="form-label">Título da Vaga</label>
+        <input type="text" class="form-control" id="titulo" placeholder="Ex: Desenvolvedor Front-end" required>
+      </div>
+      <div class="mb-3">
+        <label for="empresa" class="form-label">Empresa</label>
+        <input type="text" class="form-control" id="empresa" placeholder="Ex: Vagas App Ltda." required>
+      </div>
+      <div class="mb-3">
+        <label for="localizacao" class="form-label">Localização</label>
+        <input type="text" class="form-control" id="localizacao" placeholder="Ex: Remoto ou São Paulo, SP" required>
+      </div>
+      <div class="mb-3">
+        <label for="salario" class="form-label">Salário (Opcional)</label>
+        <input type="text" class="form-control" id="salario" placeholder="Ex: R$ 3.000 - R$ 5.000">
+      </div>
+      <div class="mb-3">
+        <label for="descricao" class="form-label">Descrição da Vaga</label>
+        <textarea class="form-control" id="descricao" rows="5" placeholder="Detalhes da vaga..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Adicionar Vaga</button>
+      <div id="statusMessage" class="mt-3 text-center"></div>
+    </form>
   </div>
 `;
 
@@ -102,14 +148,17 @@ function renderContent(template) {
       e.preventDefault();
       const email = authForm.email.value;
       const senha = authForm.senha.value;
+      const userType = authForm.userType.value;
       authMessage.textContent = 'Verificando...';
 
       try {
-        await signInWithEmailAndPassword(auth, email, senha);
+        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+        await verificarESalvarTipoUsuario(userCredential.user.uid, userType);
       } catch (loginError) {
         if (loginError.code === 'auth/user-not-found') {
           try {
-            await createUserWithEmailAndPassword(auth, email, senha);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+            await verificarESalvarTipoUsuario(userCredential.user.uid, userType);
             authMessage.textContent = 'Conta criada com sucesso!';
           } catch (registerError) {
             authMessage.textContent = registerError.message;
@@ -119,18 +168,24 @@ function renderContent(template) {
         }
       }
     });
-  } else if (template === dashboardTemplate) {
+  } else if (template === candidatoDashboardTemplate) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     const vagasContainer = document.getElementById('vagasContainer');
-    const perfilBtn = document.getElementById('perfilBtn');
-
-    logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
-    });
-
+    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
     welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
     carregarVagas();
+  } else if (template === empresaDashboardTemplate) {
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
+    welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
+    const vagaForm = document.getElementById('vagaForm');
+    const statusMessage = document.getElementById('statusMessage');
+    vagaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      postarVaga(auth.currentUser.uid, vagaForm, statusMessage);
+    });
   } else if (template === perfilTemplate) {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -139,18 +194,13 @@ function renderContent(template) {
     const statusPerfil = document.getElementById('statusPerfil');
     const statusCurriculo = document.getElementById('statusCurriculo');
     const curriculoStatus = document.getElementById('curriculoStatus');
-
-    logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
-    });
+    logoutBtn.addEventListener('click', async () => { await signOut(auth); });
     welcomeMessage.textContent = `Olá, ${auth.currentUser.email}!`;
-    carregarPerfil(auth.currentUser.uid, perfilForm, statusCurriculo, curriculoStatus);
-
+    carregarPerfil(auth.currentUser.uid, perfilForm, curriculoStatus);
     perfilForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       salvarPerfil(auth.currentUser.uid, perfilForm, statusPerfil);
     });
-
     curriculoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       uploadCurriculo(auth.currentUser.uid, curriculoForm, statusCurriculo);
@@ -160,15 +210,36 @@ function renderContent(template) {
 
 // Lógica de Roteamento para a SPA
 window.addEventListener('hashchange', () => {
-  if (window.location.hash === '#perfil') {
-    renderContent(perfilTemplate);
-  } else {
-    renderContent(dashboardTemplate);
-  }
+  const user = auth.currentUser;
+  if (!user) { renderContent(loginTemplate); return; }
+  verificarTipoUsuarioEExibirDashboard(user.uid);
 });
 
+// Funções de Autenticação e Usuário
+async function verificarESalvarTipoUsuario(uid, userType) {
+  const userRef = doc(db, "usuarios", uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) {
+    await setDoc(userRef, { email: auth.currentUser.email, tipoUsuario: userType });
+  }
+}
 
-// Funções do Dashboard
+async function verificarTipoUsuarioEExibirDashboard(uid) {
+  const userRef = doc(db, "usuarios", uid);
+  const userSnap = await getDoc(userRef);
+  const userType = userSnap.data()?.tipoUsuario || 'candidato';
+  if (userType === 'candidato') {
+    if (window.location.hash === '#perfil') {
+      renderContent(perfilTemplate);
+    } else {
+      renderContent(candidatoDashboardTemplate);
+    }
+  } else {
+    renderContent(empresaDashboardTemplate);
+  }
+}
+
+// Funções do Dashboard do Candidato
 async function carregarVagas() {
   const vagasContainer = document.getElementById('vagasContainer');
   vagasContainer.innerHTML = '<h4 class="text-center">Carregando vagas...</h4>';
@@ -179,7 +250,6 @@ async function carregarVagas() {
       vagasContainer.innerHTML = '<h4 class="text-center">Nenhuma vaga disponível no momento.</h4>';
       return;
     }
-    
     querySnapshot.forEach((doc) => {
       const vaga = doc.data();
       const vagaHTML = `
@@ -204,11 +274,32 @@ async function carregarVagas() {
   }
 }
 
-// Funções do Perfil
-async function carregarPerfil(uid, perfilForm, statusCurriculo, curriculoStatus) {
+// Funções do Dashboard da Empresa
+async function postarVaga(uid, vagaForm, statusMessage) {
+  statusMessage.textContent = 'Adicionando vaga...';
+  const novaVaga = {
+    titulo: vagaForm.titulo.value,
+    empresa: vagaForm.empresa.value,
+    localizacao: vagaForm.localizacao.value,
+    salario: vagaForm.salario.value,
+    descricao: vagaForm.descricao.value,
+    empresaUID: uid,
+    candidatos: []
+  };
+  try {
+    await addDoc(collection(db, "vagas"), novaVaga);
+    statusMessage.textContent = 'Vaga adicionada com sucesso!';
+    vagaForm.reset();
+  } catch (e) {
+    statusMessage.textContent = 'Erro ao adicionar a vaga: ' + e.message;
+    console.error("Erro ao adicionar a vaga:", e);
+  }
+}
+
+// Funções do Perfil do Candidato
+async function carregarPerfil(uid, perfilForm, curriculoStatus) {
   const userRef = doc(db, "usuarios", uid);
   const userSnap = await getDoc(userRef);
-
   if (userSnap.exists()) {
     const data = userSnap.data();
     perfilForm.nome.value = data.nome || '';
@@ -249,7 +340,6 @@ async function uploadCurriculo(uid, curriculoForm, statusCurriculo) {
   statusCurriculo.textContent = 'Enviando currículo...';
   const storageRef = ref(storage, `curriculos/${uid}/${file.name}`);
   const userRef = doc(db, "usuarios", uid);
-
   try {
     const uploadTask = await uploadBytes(storageRef, file);
     const url = await getDownloadURL(uploadTask.ref);
@@ -261,15 +351,10 @@ async function uploadCurriculo(uid, curriculoForm, statusCurriculo) {
   }
 }
 
-
-// Verifica o estado da autenticação do usuário e renderiza a página correta
+// Verifica o estado da autenticação e renderiza a página correta
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    if (window.location.hash === '#perfil') {
-      renderContent(perfilTemplate);
-    } else {
-      renderContent(dashboardTemplate);
-    }
+    verificarTipoUsuarioEExibirDashboard(user.uid);
   } else {
     renderContent(loginTemplate);
   }
