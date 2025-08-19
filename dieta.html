@@ -12,13 +12,13 @@
       --dark: #111;
       --light: #fff;
       --gray: #f5f5f5;
+      --accent: #007bff;
     }
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
     body{background:var(--gray);color:var(--dark);}
     header{background:var(--dark);color:var(--light);padding:20px;text-align:center;}
     header h1{font-size:1.8rem;}
     main{padding:20px;max-width:1200px;margin:auto;}
-
     section{background:var(--light);padding:15px;border-radius:8px;margin-bottom:20px;
       box-shadow:0 2px 6px rgba(0,0,0,0.1);}
     h2{margin-bottom:10px;color:var(--primary);font-size:1.3rem;}
@@ -73,6 +73,13 @@
     <p id="resultadoCadastro"></p>
   </section>
 
+  <!-- Banco de Alimentos -->
+  <section>
+    <h2>🥦 Banco de Alimentos</h2>
+    <input type="text" id="buscaAlimento" placeholder="Pesquisar alimento...">
+    <div id="listaAlimentos" class="grid"></div>
+  </section>
+
   <!-- Plano Alimentar -->
   <section>
     <h2>🥗 Plano Alimentar Diário</h2>
@@ -100,6 +107,7 @@
     <h2>⚡ Macros e Calorias</h2>
     <canvas id="chartMacros"></canvas>
     <canvas id="chartCalorias"></canvas>
+    <canvas id="chartComparativo"></canvas>
   </section>
 
   <!-- Evolução corporal -->
@@ -156,10 +164,32 @@ document.getElementById("formCadastro").addEventListener("submit",e=>{
   const peso=document.getElementById("peso").value;
   const altura=document.getElementById("altura").value/100;
   const idade=document.getElementById("idade").value;
-  const sexo=document.getElementById("sexo").value;
   let imc=(peso/(altura*altura)).toFixed(1);
   document.getElementById("resultadoCadastro").innerText=`${nome}, seu IMC é ${imc}.`;
 });
+
+// Banco de alimentos (mini-base)
+const alimentos=[ 
+  {nome:"Arroz",cal:130,prot:2,carb:28,gord:0}, 
+  {nome:"Frango",cal:165,prot:31,carb:0,gord:3},
+  {nome:"Ovo",cal:70,prot:6,carb:0,gord:5},
+  {nome:"Batata Doce",cal:86,prot:1,carb:20,gord:0}
+];
+function renderBanco(filtro=""){
+  let div=document.getElementById("listaAlimentos");
+  div.innerHTML="";
+  alimentos.filter(a=>a.nome.toLowerCase().includes(filtro.toLowerCase()))
+    .forEach(a=>{
+      div.innerHTML+=`<div class="card" onclick="addRefeicaoBanco('${a.nome}',${a.cal},${a.prot},${a.carb},${a.gord})">
+        ${a.nome}<br><small>${a.cal}kcal</small></div>`;
+    });
+}
+document.getElementById("buscaAlimento").addEventListener("input",e=>renderBanco(e.target.value));
+renderBanco();
+function addRefeicaoBanco(n,c,p,ca,g){
+  refeicoes.push({alimento:n,calorias:c,proteina:p,carbo:ca,gordura:g});
+  renderTabela();
+}
 
 // Refeições
 document.getElementById("formRefeicao").addEventListener("submit",e=>{
@@ -208,6 +238,9 @@ let chartMacros=new Chart(document.getElementById("chartMacros"),{
 let chartCalorias=new Chart(document.getElementById("chartCalorias"),{
   type:"bar",data:{labels:["Meta","Consumido"],datasets:[{label:"Calorias",data:[2500,0],backgroundColor:["#007bff","#28a745"]}]}
 });
+let chartComparativo=new Chart(document.getElementById("chartComparativo"),{
+  type:"line",data:{labels:["Seg","Ter","Qua","Qui","Sex"],datasets:[{label:"Kcal consumidas",data:[0,0,0,0,0],borderColor:"#ff5733",fill:false}]}
+});
 let chartPeso=new Chart(document.getElementById("chartPeso"),{
   type:"line",data:{labels:["Sem1","Sem2","Sem3","Sem4"],datasets:[{label:"Peso",data:[80,79,78,77],borderColor:"#28a745",fill:false}]}
 });
@@ -218,6 +251,7 @@ let chartMedidas=new Chart(document.getElementById("chartMedidas"),{
 function atualizarGraficos(cal,prot,carbo,gord){
   chartMacros.data.datasets[0].data=[prot,carbo,gord];chartMacros.update();
   chartCalorias.data.datasets[0].data=[2500,cal];chartCalorias.update();
+  chartComparativo.data.datasets[0].data=[2000,2100,cal,1800,2200];chartComparativo.update();
 }
 </script>
 </body>
