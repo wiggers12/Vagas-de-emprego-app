@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preparação Física</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #28a745;
+      --dark: #111;
+      --light: #fff;
+      --gray: #f5f5f5;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+    body { background: var(--gray); color: var(--dark); line-height: 1.6; }
+    header { background: var(--dark); color: var(--light); padding: 20px; text-align: center; }
+    header h1 { font-size: 1.8rem; }
+    main { padding: 20px; }
+    section { background: var(--light); padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
+    h2 { margin-bottom: 10px; color: var(--primary); font-size: 1.3rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .card { padding: 10px; border: 1px solid #ddd; border-radius: 6px; text-align: center; cursor: pointer; }
+    .card:hover { background: #f0f0f0; }
+    button { background: var(--primary); color: var(--light); padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #1e7e34; }
+    input, select { padding: 8px; margin-bottom: 8px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
+    video { width: 100%; border-radius: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💪 Preparação Física</h1>
+    <p>Força • Resistência • Condicionamento • Agilidade</p>
+  </header>
+
+  <main>
+
+    <!-- Planejamento de Treino -->
+    <section>
+      <h2>📋 Planejamento de Treinos</h2>
+      <select>
+        <option>Selecione o foco</option>
+        <option>Força</option>
+        <option>Resistência</option>
+        <option>Flexibilidade</option>
+        <option>Agilidade</option>
+      </select>
+      <input type="text" placeholder="Exercício">
+      <input type="number" placeholder="Séries">
+      <input type="number" placeholder="Repetições/Tempo">
+      <button onclick="alert('Treino salvo!')">Salvar Treino</button>
+    </section>
+
+    <!-- Evolução Física -->
+    <section>
+      <h2>📊 Evolução Física</h2>
+      <canvas id="evolucaoChart"></canvas>
+    </section>
+
+    <!-- Testes Físicos -->
+    <section>
+      <h2>⏱ Testes Físicos</h2>
+      <div class="grid">
+        <div class="card" onclick="registrarTeste('Corrida')">+ Corrida 12min</div>
+        <div class="card" onclick="registrarTeste('Flexão')">+ Flexões</div>
+        <div class="card" onclick="registrarTeste('Abdominal')">+ Abdominais</div>
+        <div class="card" onclick="registrarTeste('Agilidade')">+ Agilidade</div>
+      </div>
+      <canvas id="testeChart"></canvas>
+    </section>
+
+    <!-- Carga de Treino -->
+    <section>
+      <h2>🏋️ Controle de Cargas Semanais</h2>
+      <canvas id="cargaChart"></canvas>
+    </section>
+
+    <!-- Vídeos de Técnica -->
+    <section>
+      <h2>🎥 Técnicas de Preparação</h2>
+      <input type="file" accept="video/*" onchange="carregarVideo(event)">
+      <video id="videoTreino" controls></video>
+    </section>
+
+    <!-- Metas e Gamificação -->
+    <section>
+      <h2>🎯 Metas</h2>
+      <p>Pontos: <span id="pontos">0</span></p>
+      <button onclick="ganharPontos()">Completar Meta</button>
+    </section>
+  </main>
+
+  <script>
+    // Evolução Chart
+    new Chart(document.getElementById('evolucaoChart'), {
+      type: 'line',
+      data: {
+        labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+        datasets: [{ label: 'Carga Total (kg)', data: [100,200,250,300], borderColor:'#28a745', fill:false }]
+      }
+    });
+
+    // Testes Físicos
+    let testeData = { Corrida: 0, Flexão: 0, Abdominal: 0, Agilidade: 0 };
+    let testeChart = new Chart(document.getElementById('testeChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(testeData),
+        datasets: [{ label: 'Resultados', data: Object.values(testeData), backgroundColor:'#28a745' }]
+      }
+    });
+    function registrarTeste(tipo) {
+      testeData[tipo] += 1;
+      testeChart.data.datasets[0].data = Object.values(testeData);
+      testeChart.update();
+    }
+
+    // Carga semanal
+    new Chart(document.getElementById('cargaChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+        datasets: [{ label: 'Volume Treino (min)', data: [300,400,450,500], backgroundColor:'#007bff' }]
+      }
+    });
+
+    // Vídeos
+    function carregarVideo(e) {
+      let file = e.target.files[0];
+      let url = URL.createObjectURL(file);
+      document.getElementById('videoTreino').src = url;
+    }
+
+    // Gamificação
+    let pontos = 0;
+    function ganharPontos() {
+      pontos += 10;
+      document.getElementById('pontos').textContent = pontos;
+    }
+  </script>
+</body>
+</html>
