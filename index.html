@@ -6,36 +6,33 @@
   <title>App Jiu-Jitsu</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #000;
-      color: #fff;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
     }
     header {
-      background: #111;
-      padding: 10px;
+      background: #000;
+      color: #FFD700; /* amarelo ouro */
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
       display: flex;
       justify-content: space-around;
-      align-items: center;
-      border-bottom: 2px solid #FFD700;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    header h1 {
-      color: #FFD700;
-      font-size: 20px;
+      background: #FFD700;
     }
     nav button {
-      background: none;
+      background: transparent;
       border: none;
-      color: #fff;
-      font-size: 16px;
+      padding: 14px;
+      font-weight: bold;
       cursor: pointer;
-      padding: 8px 12px;
+      color: #000;
     }
-    nav button:hover {
-      color: #FFD700;
+    nav button.active {
+      border-bottom: 3px solid #000;
     }
     section {
       display: none;
@@ -46,97 +43,89 @@
     }
     input, select, textarea {
       display: block;
-      margin: 10px 0;
+      width: 95%;
       padding: 8px;
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid #FFD700;
+      margin: 10px 0;
+      border: 1px solid #ccc;
       border-radius: 4px;
-      background: #111;
-      color: #fff;
     }
-    button.action {
-      background: #FFD700;
-      color: #000;
+    .btn {
+      background: #000;
+      color: #FFD700;
+      padding: 10px;
       border: none;
-      padding: 10px 15px;
       border-radius: 4px;
       cursor: pointer;
       margin-top: 10px;
-      font-weight: bold;
-    }
-    button.action:hover {
-      background: #fff;
-      color: #000;
     }
     .card {
-      background: #111;
-      border: 1px solid #FFD700;
-      border-radius: 6px;
+      border: 1px solid #ddd;
       padding: 15px;
+      border-radius: 5px;
       margin: 10px 0;
+      background: #f9f9f9;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Jiu-Jitsu App</h1>
-    <nav>
-      <button onclick="mostrar('inicio')">Início</button>
-      <button onclick="mostrar('cadastro')">Cadastro</button>
-      <button onclick="mostrar('campeonatos')">Campeonatos</button>
-      <button onclick="mostrar('dieta')">Dieta</button>
-    </nav>
+    <h1>Jornada do Jiu-Jitsu</h1>
   </header>
 
-  <!-- Início -->
-  <section id="inicio" class="active">
-    <h2>Bem-vindo ao App de Jiu-Jitsu</h2>
-    <p>Acompanhe sua evolução como atleta: cadastre seus dados, registre campeonatos e siga sua dieta de forma interativa.</p>
+  <nav>
+    <button class="active" onclick="showTab('home')">Home</button>
+    <button onclick="showTab('cadastro')">Cadastro</button>
+    <button onclick="showTab('dieta')">Dieta</button>
+  </nav>
+
+  <!-- HOME -->
+  <section id="home" class="active">
+    <h2>Bem-vindo</h2>
+    <p>Acompanhe sua evolução no Jiu-Jitsu com cadastro, histórico e dieta personalizada.</p>
   </section>
 
-  <!-- Cadastro -->
+  <!-- CADASTRO DO ATLETA -->
   <section id="cadastro">
     <h2>Cadastro do Atleta</h2>
-    <input id="nome" placeholder="Nome" />
-    <input id="sobrenome" placeholder="Sobrenome" />
-    <input id="idade" type="number" placeholder="Idade" />
-    <select id="graduacao">
-      <option value="">Selecione a graduação</option>
-      <option>Branca</option>
-      <option>Azul</option>
-      <option>Roxa</option>
-      <option>Marrom</option>
-      <option>Preta</option>
-    </select>
-    <input id="tempo" placeholder="Tempo de treino (anos)" />
-    <button class="action" onclick="salvarCadastro()">Salvar Cadastro</button>
-    <div id="cadastroMsg"></div>
+    <form id="formAtleta">
+      <input type="text" id="nome" placeholder="Nome" required>
+      <input type="text" id="sobrenome" placeholder="Sobrenome" required>
+      <input type="number" id="idade" placeholder="Idade" required>
+      <select id="graduacao" required>
+        <option value="">Selecione a Graduação</option>
+        <option>Branca</option>
+        <option>Azul</option>
+        <option>Roxa</option>
+        <option>Marrom</option>
+        <option>Preta</option>
+      </select>
+      <input type="text" id="tempo" placeholder="Tempo de treino (anos)">
+      <h3>Histórico de Campeonatos</h3>
+      <input type="number" id="lutou" placeholder="Quantos já lutou">
+      <input type="number" id="ganhou" placeholder="Quantos ganhou">
+      <input type="number" id="perdeu" placeholder="Quantos perdeu">
+      <button type="submit" class="btn">Salvar Atleta</button>
+    </form>
+    <div id="listaAtletas"></div>
   </section>
 
-  <!-- Campeonatos -->
-  <section id="campeonatos">
-    <h2>Campeonatos</h2>
-    <input id="lutou" type="number" placeholder="Quantos campeonatos lutou" />
-    <input id="ganhou" type="number" placeholder="Quantos ganhou" />
-    <input id="perdeu" type="number" placeholder="Quantos perdeu" />
-    <button class="action" onclick="salvarCampeonatos()">Salvar Campeonatos</button>
-    <div id="campMsg"></div>
-  </section>
-
-  <!-- Dieta -->
+  <!-- DIETA -->
   <section id="dieta">
-    <h2>Dieta e Alimentação</h2>
-    <textarea id="refeicao" placeholder="Descreva a refeição (ex: Arroz, frango, salada)"></textarea>
-    <button class="action" onclick="salvarRefeicao()">Adicionar Refeição</button>
-    <h3>Histórico de Refeições</h3>
+    <h2>Dieta e Agenda Alimentar</h2>
+    <form id="formDieta">
+      <input type="text" id="refeicao" placeholder="Descrição da refeição" required>
+      <input type="time" id="hora" required>
+      <button type="submit" class="btn">Adicionar Refeição</button>
+    </form>
     <div id="listaDieta"></div>
   </section>
 
   <!-- Firebase -->
   <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
@@ -149,65 +138,82 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    let atletaId = "atleta1"; // fixo por enquanto
+    // Função para trocar abas
+    window.showTab = function(tab) {
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(tab).classList.add("active");
+      event.target.classList.add("active");
+    };
 
-    // Cadastro
-    async function salvarCadastro() {
+    // Cadastro do Atleta
+    const formAtleta = document.getElementById("formAtleta");
+    const listaAtletas = document.getElementById("listaAtletas");
+    formAtleta.addEventListener("submit", async (e) => {
+      e.preventDefault();
       const data = {
-        nome: document.getElementById("nome").value,
-        sobrenome: document.getElementById("sobrenome").value,
-        idade: document.getElementById("idade").value,
-        graduacao: document.getElementById("graduacao").value,
-        tempo: document.getElementById("tempo").value
+        nome: nome.value,
+        sobrenome: sobrenome.value,
+        idade: idade.value,
+        graduacao: graduacao.value,
+        tempo: tempo.value,
+        lutou: lutou.value,
+        ganhou: ganhou.value,
+        perdeu: perdeu.value
       };
-      await setDoc(doc(db, "atletas", atletaId), data, { merge: true });
-      document.getElementById("cadastroMsg").innerText = "✅ Cadastro salvo com sucesso!";
-    }
-
-    // Campeonatos
-    async function salvarCampeonatos() {
-      const data = {
-        campeonatos: {
-          lutou: document.getElementById("lutou").value,
-          ganhou: document.getElementById("ganhou").value,
-          perdeu: document.getElementById("perdeu").value
-        }
-      };
-      await setDoc(doc(db, "atletas", atletaId), data, { merge: true });
-      document.getElementById("campMsg").innerText = "✅ Dados de campeonatos salvos!";
-    }
-
-    // Dieta
-    async function salvarRefeicao() {
-      const refeicao = document.getElementById("refeicao").value;
-      if (!refeicao) return;
-      await addDoc(collection(db, "atletas", atletaId, "dieta"), {
-        refeicao: refeicao,
-        data: new Date().toLocaleString()
-      });
-      document.getElementById("refeicao").value = "";
-    }
-
-    // Histórico em tempo real
-    const listaDieta = document.getElementById("listaDieta");
-    onSnapshot(collection(db, "atletas", atletaId, "dieta"), (snapshot) => {
-      listaDieta.innerHTML = "";
-      snapshot.forEach(doc => {
-        const item = doc.data();
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerText = `${item.data} - ${item.refeicao}`;
-        listaDieta.appendChild(div);
-      });
+      await addDoc(collection(db, "atletas"), data);
+      alert("Atleta cadastrado!");
+      listarAtletas();
+      formAtleta.reset();
     });
 
-    // Navegação
-    window.mostrar = function(id) {
-      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    };
+    async function listarAtletas() {
+      listaAtletas.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "atletas"));
+      querySnapshot.forEach(doc => {
+        const a = doc.data();
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<strong>${a.nome} ${a.sobrenome}</strong><br>
+                         Idade: ${a.idade} | Graduação: ${a.graduacao}<br>
+                         Treino: ${a.tempo} anos<br>
+                         Lutas: ${a.lutou} | Vitórias: ${a.ganhou} | Derrotas: ${a.perdeu}`;
+        listaAtletas.appendChild(div);
+      });
+    }
+    listarAtletas();
+
+    // Dieta
+    const formDieta = document.getElementById("formDieta");
+    const listaDieta = document.getElementById("listaDieta");
+    formDieta.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        refeicao: refeicao.value,
+        hora: hora.value
+      };
+      await addDoc(collection(db, "dietas"), data);
+      alert("Refeição adicionada!");
+      listarDieta();
+      formDieta.reset();
+    });
+
+    async function listarDieta() {
+      listaDieta.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "dietas"));
+      querySnapshot.forEach(doc => {
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<strong>${d.hora}</strong> - ${d.refeicao}`;
+        listaDieta.appendChild(div);
+      });
+    }
+    listarDieta();
+
   </script>
 </body>
 </html>
