@@ -164,6 +164,8 @@
     <p>Conquistas: <span id="conquistas">Nenhuma</span></p>
   </section>
 </main>
+<!-- Botão Voltar (Fim) -->
+  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
 
 <script>
 let refeicoes=[], agua=0, pontos=0;
@@ -269,9 +271,7 @@ function atualizarGraficos(cal,prot,carbo,gord){
   chartMacros.data.datasets[0].data=[prot,carbo,gord];chartMacros.update();
   chartCalorias.data.datasets[0].data=[2500,cal];chartCalorias.update();
   chartComparativo.data.datasets[0].data=[2000,2100,cal,1800,2200];chartComparativo.update();
-}
-<!-- Botão Voltar (Fim) -->
-  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+ 
 </script>
 </body>
 </html>
