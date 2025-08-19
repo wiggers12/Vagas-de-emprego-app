@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Técnicas - Jiu-Jitsu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Montserrat', sans-serif; background: #f5f5f5; margin: 0; }
+    header { background: #111; color: #FFD700; text-align: center; padding: 15px; }
+    section { padding: 20px; }
+    h2 { color: #FFD700; margin-top: 20px; }
+    .search-box { margin: 15px 0; }
+    .search-box input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    .filters { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+    .filters button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .filters button.active { background: #FFD700; color: #111; }
+    .category { margin-top: 20px; }
+    .technique { background: #fff; padding: 12px; margin: 10px 0; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .technique h3 { margin: 0; color: #333; }
+    .technique p { margin: 5px 0; font-size: 14px; }
+    .add-btn { position: fixed; bottom: 20px; right: 20px; background: #FFD700; color: #111; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; }
+    .modal-content h3 { margin-top: 0; }
+    .modal-content label { display: block; margin-top: 10px; font-weight: 600; }
+    .modal-content input, .modal-content select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
+    .modal-content button { margin-top: 15px; width: 100%; padding: 10px; background: #FFD700; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📖 Catálogo de Técnicas do Jiu-Jitsu</h1>
+    <p>Pesquise, filtre e adicione suas técnicas</p>
+  </header>
+
+  <section>
+    <!-- Busca -->
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔎 Buscar técnica... (ex: kimura, guarda X)">
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <button class="active" onclick="filtrarCategoria('all')">Todas</button>
+      <button onclick="filtrarCategoria('posicoes')">Posições</button>
+      <button onclick="filtrarCategoria('guardas')">Guardas</button>
+      <button onclick="filtrarCategoria('finalizacoes')">Finalizações</button>
+      <button onclick="filtrarCategoria('pernas')">Chaves de Perna</button>
+      <button onclick="filtrarCategoria('raspagens')">Raspagens</button>
+      <button onclick="filtrarCategoria('combinacoes')">Combinações</button>
+    </div>
+
+    <!-- Catálogo -->
+    <div id="catalogo">
+
+      <!-- Categoria: Posições -->
+      <div class="category posicoes">
+        <h2>⚔️ Posições</h2>
+        <div class="technique" data-name="guarda fechada"><h3>Guarda Fechada</h3><p>Controle do adversário segurando-o entre as pernas.</p></div>
+        <div class="technique" data-name="guarda aberta"><h3>Guarda Aberta</h3><p>Mais dinâmica, permite transições para várias guardas.</p></div>
+        <div class="technique" data-name="montada"><h3>Montada</h3><p>Posição dominante por cima, com controle total.</p></div>
+        <div class="technique" data-name="cem quilos"><h3>Cem Quilos (Side Control)</h3><p>Controle lateral pressionando o adversário.</p></div>
+        <div class="technique" data-name="meia guarda"><h3>Meia-Guarda</h3><p>Controle de quadril e perna, usada para defesa e ataque.</p></div>
+        <div class="technique" data-name="north south"><h3>North-South</h3><p>Controle invertido, ideal para estrangulamentos.</p></div>
+        <div class="technique" data-name="costas"><h3>Costas</h3><p>A posição mais dominante, base para o mata-leão.</p></div>
+        <div class="technique" data-name="tartaruga"><h3>Tartaruga</h3><p>Posição defensiva encolhida, com risco de ataques rápidos.</p></div>
+        <div class="technique" data-name="k guard"><h3>K-Guard</h3><p>Posição moderna para ataques de perna.</p></div>
+        <div class="technique" data-name="matrix guard"><h3>Matrix Guard</h3><p>Controle de quadril e setups de raspagem.</p></div>
+      </div>
+
+      <!-- Categoria: Guardas -->
+      <div class="category guardas">
+        <h2>⚡ Guardas</h2>
+        <div class="technique" data-name="borboleta"><h3>Guarda Borboleta</h3><p>Controle com ganchos dos pés na parte interna das pernas.</p></div>
+        <div class="technique" data-name="de la riva"><h3>Guarda De La Riva</h3><p>Controle externo da perna para raspagens e berimbolo.</p></div>
+        <div class="technique" data-name="reverse de la riva"><h3>Guarda Invertida</h3><p>Controle interno da perna, usada em transições.</p></div>
+        <div class="technique" data-name="x guard"><h3>Guarda X</h3><p>Controle das pernas do adversário, poderosa para raspar.</p></div>
+        <div class="technique" data-name="single leg x"><h3>Guarda Single Leg X</h3><p>Base para raspagens rápidas e ataques de perna.</p></div>
+        <div class="technique" data-name="worm"><h3>Guarda Worm</h3><p>Controle usando lapela do adversário para prender e atacar.</p></div>
+        <div class="technique" data-name="spider"><h3>Guarda Aranha</h3><p>Controle de braços usando pés nos bíceps e mangas.</p></div>
+        <div class="technique" data-name="lasso"><h3>Guarda Lasso</h3><p>Controle enrolando a perna no braço do adversário.</p></div>
+        <div class="technique" data-name="50/50"><h3>Guarda 50/50</h3><p>Ambos atletas com pernas entrelaçadas, posição neutra.</p></div>
+        <div class="technique" data-name="deep half"><h3>Deep Half Guard</h3><p>Controle profundo embaixo do adversário para raspagens.</p></div>
+      </div>
+
+      <!-- Categoria: Finalizações -->
+      <div class="category finalizacoes">
+        <h2>🥋 Finalizações</h2>
+        <div class="technique" data-name="armlock"><h3>Armlock</h3><p>Chave de braço clássica, aplicada de várias posições.</p></div>
+        <div class="technique" data-name="kimura"><h3>Kimura</h3><p>Chave de ombro muito eficiente.</p></div>
+        <div class="technique" data-name="americana"><h3>Americana</h3><p>Chave de ombro, geralmente do cem quilos ou montada.</p></div>
+        <div class="technique" data-name="triangulo"><h3>Triângulo</h3><p>Estrangulamento com as pernas envolvendo o pescoço e braço.</p></div>
+        <div class="technique" data-name="omoplata"><h3>Omoplata</h3><p>Chave de ombro com as pernas.</p></div>
+        <div class="technique" data-name="gogoplata"><h3>Gogoplata</h3><p>Estrangulamento aplicado com a canela no pescoço.</p></div>
+        <div class="technique" data-name="mata leao"><h3>Mata-Leão</h3><p>Estrangulamento aplicado pelas costas.</p></div>
+        <div class="technique" data-name="ezekiel"><h3>Estrangulamento Ezequiel</h3><p>Usa a manga do próprio kimono para estrangular.</p></div>
+        <div class="technique" data-name="bow and arrow"><h3>Arco e Flecha</h3><p>Estrangulamento com lapela.</p></div>
+        <div class="technique" data-name="loop choke"><h3>Loop Choke</h3><p>Estrangulamento rápido da guarda.</p></div>
+        <div class="technique" data-name="baseball choke"><h3>Baseball Choke</h3><p>Pegada cruzada como no beisebol.</p></div>
+        <div class="technique" data-name="von flue"><h3>Von Flue</h3><p>Estrangulamento contra guilhotina.</p></div>
+        <div class="technique" data-name="peruvian necktie"><h3>Peruvian Necktie</h3><p>Estrangulamento rápido da frente.</p></div>
+        <div class="technique" data-name="tarikoplata"><h3>Tarikoplata</h3><p>Chave de ombro moderna.</p></div>
+        <div class="technique" data-name="baratoplata"><h3>Baratoplata</h3><p>Finalização criada por Rafael “Barata”.</p></div>
+      </div>
+
+      <!-- Categoria: Chaves de Perna -->
+      <div class="category pernas">
+        <h2>🦵 Chaves de Perna</h2>
+        <div class="technique" data-name="ankle lock"><h3>Chave de Pé Reta</h3><p>Finalização básica no tornozelo.</p></div>
+        <div class="technique" data-name="heel hook"><h3>Heel Hook</h3><p>Chave de calcanhar, muito usada no No-Gi.</p></div>
+        <div class="technique" data-name="toe hold"><h3>Toe Hold</h3><p>Chave de dedos do pé, torcendo o pé.</p></div>
+        <div class="technique" data-name="knee bar"><h3>Knee Bar</h3><p>Chave de joelho, como um armlock na perna.</p></div>
+        <div class="technique" data-name="estima lock"><h3>Estima Lock</h3><p>Finalização rápida de tornozelo.</p></div>
+        <div class="technique" data-name="calf slicer"><h3>Calf Slicer</h3><p>Compressão dolorosa na panturrilha.</p></div>
+      </div>
+
+      <!-- Categoria: Raspagens -->
+      <div class="category raspagens">
+        <h2>🔄 Raspagens & Transições</h2>
+        <div class="technique" data-name="scissor sweep"><h3>Scissor Sweep</h3><p>Raspagem em tesoura da guarda fechada.</p></div>
+        <div class="technique" data-name="flower sweep"><h3>Flower Sweep</h3><p>Raspagem em alavanca com quadril.</p></div>
+        <div class="technique" data-name="lumberjack sweep"><h3>Lumberjack Sweep</h3><p>Derrubada rápida puxando tornozelos.</p></div>
+        <div class="technique" data-name="balloon sweep"><h3>Balloon Sweep</h3><p>Joga o adversário por cima como balão.</p></div>
+        <div class="technique" data-name="technical stand up"><h3>Technical Stand Up</h3><p>Técnica de levantar com segurança.</p></div>
+        <div class="technique" data-name="hip escape"><h3>Hip Escape (Shrimp)</h3><p>Movimento básico para recuperar guarda.</p></div>
+      </div>
+
+      <!-- Categoria: Combinações -->
+      <div class="category combinacoes">
+        <h2>🔗 Combinações</h2>
+        <div class="technique" data-name="guarda fechada kimura omoplata triangulo"><h3>Guarda Fechada ➝ Kimura ➝ Omoplata ➝ Triângulo</h3><p>Sequência clássica encadeada.</p></div>
+        <div class="technique" data-name="borboleta raspagem montada armlock"><h3>Borboleta ➝ Raspagem ➝ Montada ➝ Armlock</h3><p>Transição ofensiva da guarda borboleta.</p></div>
+        <div class="technique" data-name="de la riva berimbolo costas mata leao"><h3>De La Riva ➝ Berimbolo ➝ Costas ➝ Mata-Leão</h3><p>Encadeamento moderno até as costas.</p></div>
+        <div class="technique" data-name="meia guarda deep half sweep montada americana"><h3>Meia-Guarda ➝ Deep Half ➝ Sweep ➝ Montada ➝ Americana</h3><p>Transforma defesa em ataque finalizador.</p></div>
+        <div class="technique" data-name="montada ezequiel arco e flecha"><h3>Montada ➝ Ezequiel ➝ Arco e Flecha</h3><p>Encadeamento de estrangulamentos.</p></div>
+        <div class="technique" data-name="single leg x sweep heel hook"><h3>Single Leg X ➝ Raspagem ➝ Heel Hook</h3><p>Combinação agressiva de raspagem + chave de perna.</p></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Botão de adicionar -->
+  <button class="add-btn" onclick="abrirModal()">➕</button>
+
+  <!-- Modal -->
+  <div class="modal" id="modalAdd">
+    <div class="modal-content">
+      <h3>Adicionar Nova Técnica</h3>
+      <label>Nome da técnica</label>
+      <input type="text" id="novaNome">
+      <label>Descrição</label>
+      <input type="text" id="novaDescricao">
+      <label>Categoria</label>
+      <select id="novaCategoria">
+        <option value="posicoes">Posições</option>
+        <option value="guardas">Guardas</option>
+        <option value="finalizacoes">Finalizações</option>
+        <option value="pernas">Chaves de Perna</option>
+        <option value="raspagens">Raspagens</option>
+        <option value="combinacoes">Combinações</option>
+      </select>
+      <label>Vídeo (opcional - URL YouTube)</label>
+      <input type="text" id="novaVideo">
+      <button onclick="salvarTecnica()">Salvar</button>
+    </div>
+  </div>
+
+  <script>
+    // Busca
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const termo = this.value.toLowerCase();
+      document.querySelectorAll('.technique').forEach(item => {
+        const nome = item.getAttribute('data-name').toLowerCase();
+        item.style.display = nome.includes(termo) ? 'block' : 'none';
+      });
+    });
+
+    // Filtros
+    function filtrarCategoria(cat) {
+      document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.category').forEach(c => {
+        if (cat === 'all' || c.classList.contains(cat)) {
+          c.style.display = 'block';
+        } else {
+          c.style.display          c.style.display = 'none';
+        }
+      });
+    }
+
+    // Modal
+    function abrirModal() { 
+      document.getElementById('modalAdd').style.display = 'flex'; 
+    }
+    function fecharModal() { 
+      document.getElementById('modalAdd').style.display = 'none'; 
+    }
+
+    // Salvar nova técnica
+    function salvarTecnica() {
+      const nome = document.getElementById('novaNome').value.trim();
+      const desc = document.getElementById('novaDescricao').value.trim();
+      const cat = document.getElementById('novaCategoria').value;
+      const video = document.getElementById('novaVideo').value.trim();
+
+      if (!nome || !desc) { 
+        alert("Preencha todos os campos obrigatórios!"); 
+        return; 
+      }
+
+      // Seleciona a categoria onde será adicionada
+      const container = document.querySelector('.category.' + cat);
+
+      const div = document.createElement('div');
+      div.className = "technique";
+      div.setAttribute('data-name', nome.toLowerCase());
+      div.innerHTML = `<h3>${nome}</h3><p>${desc}</p>`;
+
+      if (video) {
+        // Se incluir link do YouTube, embute como iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = video;
+        iframe.width = "100%";
+        iframe.height = "200";
+        iframe.setAttribute("allowfullscreen", "true");
+        div.appendChild(iframe);
+      }
+
+      container.appendChild(div);
+
+      // Limpa e fecha modal
+      fecharModal();
+      document.getElementById('novaNome').value = "";
+      document.getElementById('novaDescricao').value = "";
+      document.getElementById('novaVideo').value = "";
+    }
+
+    // Fechar modal clicando fora
+    window.onclick = function(e) {
+      if (e.target === document.getElementById('modalAdd')) fecharModal();
+    }
+  </script>
+</body>
+</html>
