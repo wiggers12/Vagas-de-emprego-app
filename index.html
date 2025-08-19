@@ -3,247 +3,345 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App Atleta</title>
+  <title>App do Atleta - Jiu-Jitsu</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fff;
-      color: #000;
-      display: flex;
+    :root {
+      --primary: #FFD700; /* Amarelo ouro */
+      --dark: #111;       /* Preto */
+      --light: #fff;      /* Branco */
+      --gray: #f5f5f5;
     }
-    /* Sidebar */
-    .sidebar {
-      width: 220px;
-      background: #000;
-      color: #fff;
-      height: 100vh;
-      position: fixed;
-      top: 0; left: 0;
-      display: flex;
-      flex-direction: column;
-      padding-top: 20px;
-    }
-    .sidebar h2 {
-      color: #FFD700;
-      text-align: center;
-    }
-    .sidebar a {
-      padding: 12px 20px;
-      color: #fff;
-      text-decoration: none;
-      display: block;
-    }
-    .sidebar a:hover {
-      background: #FFD700;
-      color: #000;
-    }
-    /* Conteúdo principal */
-    .main {
-      margin-left: 220px;
-      padding: 20px;
-      width: 100%;
-    }
-    section {
-      display: none;
-    }
-    section.active {
-      display: block;
-    }
-    h1 {
-      color: #FFD700;
-    }
-    .form-group {
-      margin-bottom: 10px;
-    }
-    label { display: block; margin-bottom: 5px; }
-    input, select, textarea {
-      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;
-    }
-    button {
-      padding: 10px 15px; background: #FFD700; border: none; border-radius: 5px; cursor: pointer;
-    }
-    button:hover { background: #000; color: #FFD700; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 8px; border-bottom: 1px solid #ddd; }
-    canvas { max-width: 100%; margin-top: 20px; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+    body { background: var(--gray); color: var(--dark); }
+    header { background: var(--dark); color: var(--primary); padding: 15px; text-align: center; }
+    nav { display: flex; justify-content: space-around; background: var(--primary); padding: 10px; flex-wrap: wrap; }
+    nav button { background: none; border: none; color: var(--dark); font-weight: 600; cursor: pointer; transition: 0.3s; margin: 5px; }
+    nav button:hover { color: var(--light); }
+    .section { display: none; padding: 20px; animation: fadeIn 0.4s ease-in-out; }
+    .active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .card { background: var(--light); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2 { margin-bottom: 10px; color: var(--primary); }
+    .profile { display: flex; align-items: center; gap: 15px; }
+    .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); }
+    ul { list-style: none; margin-top: 10px; padding: 0; }
+    ul li { padding: 8px; border-bottom: 1px solid #ddd; }
+    footer { background: var(--dark); color: var(--primary); text-align: center; padding: 10px; margin-top: 20px; }
+    /* Chat */
+    .chat-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
+    .msg { margin: 5px 0; padding: 8px; border-radius: 6px; max-width: 70%; }
+    .msg.user { background: var(--primary); color: var(--dark); margin-left: auto; }
+    .msg.bot { background: var(--dark); color: var(--primary); margin-right: auto; }
+    .chat-input { display: flex; gap: 10px; }
+    .chat-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .chat-input button { background: var(--primary); border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--dark); }
+    /* Formulário Cadastro */
+    form label { font-weight: 600; display: block; margin-top: 10px; }
+    form input, form select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-top: 5px; }
+    form button { margin-top: 15px; background: var(--primary); border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    form button:hover { background: #e6c200; }
   </style>
 </head>
 <body>
-  <!-- Menu lateral -->
-  <div class="sidebar">
-    <h2>Atleta</h2>
-    <a href="#" onclick="showSection('dashboard')">📊 Dashboard</a>
-    <a href="#" onclick="showSection('cadastro')">📝 Cadastro</a>
-    <a href="#" onclick="showSection('campeonatos')">🥋 Campeonatos</a>
-    <a href="#" onclick="showSection('treinos')">🏋️ Treinos</a>
-    <a href="#" onclick="showSection('metas')">🎯 Metas</a>
-    <a href="#" onclick="showSection('dieta')">🍎 Dieta</a>
-  </div>
+  <header>
+    <h1>🥋 App do Atleta</h1>
+    <p>Sua jornada no Jiu-Jitsu</p>
+  </header>
 
-  <!-- Conteúdo -->
-  <div class="main">
-    <!-- Dashboard -->
-    <section id="dashboard" class="active">
-      <h1>📊 Dashboard</h1>
-      <canvas id="graficoVitorias"></canvas>
-      <canvas id="graficoTreinos"></canvas>
-      <canvas id="graficoMetas"></canvas>
-    </section>
+  <nav>
+    <button onclick="showSection('home')">Início</button>
+    <button onclick="showSection('cadastro')">Cadastro</button>
+    <button onclick="showSection('dashboard')">Dashboard</button>
+    <button onclick="showSection('treinos')">Treinos</button>
+    <button onclick="showSection('metas')">Metas</button>
+    <button onclick="showSection('analise')">Análise</button>
+    <button onclick="showSection('videos')">Vídeos</button>
+    <button onclick="showSection('chat')">Chat</button>
+    <button onclick="showSection('dieta')">Dieta</button>
+    <button onclick="showSection('contato')">Contato</button>
+  </nav>
 
-    <!-- Cadastro -->
-    <section id="cadastro">
-      <h1>📝 Cadastro do Atleta</h1>
+  <section id="home" class="section active">
+    <div class="card">
+      <h2>Bem-vindo!</h2>
+      <p>Organize seus treinos, acompanhe sua evolução e melhore sua performance no Jiu-Jitsu com este app completo.</p>
+    </div>
+  </section>
+
+  <section id="cadastro" class="section">
+    <div class="card">
+      <h2>Cadastro do Atleta</h2>
       <form id="cadastroForm">
-        <div class="form-group"><label>Nome</label><input type="text" id="nome"></div>
-        <div class="form-group"><label>Sobrenome</label><input type="text" id="sobrenome"></div>
-        <div class="form-group"><label>Idade</label><input type="number" id="idade"></div>
-        <div class="form-group"><label>Graduação (faixa)</label><input type="text" id="graduacao"></div>
-        <div class="form-group"><label>Tempo de treino</label><input type="text" id="tempoTreino"></div>
-        <div class="form-group"><label>Peso (kg)</label><input type="number" id="peso" step="0.1"></div>
-        <div class="form-group"><label>Altura (cm)</label><input type="number" id="altura"></div>
-        <div class="form-group"><label>Equipe/Academia</label><input type="text" id="equipe"></div>
-        <div class="form-group"><label>Objetivo principal</label><input type="text" id="objetivo"></div>
-        <button type="submit">Salvar</button>
-      </form>
-    </section>
+        <label>Nome</label><input type="text" id="nome">
+        <label>Sobrenome</label><input type="text" id="sobrenome">
+        <label>Idade</label><input type="number" id="idade">
+        <label>Graduação (faixa)</label><input type="text" id="graduacao">
+        <label>Tempo de treino (anos)</label><input type="number" id="tempoTreino">
+        <label>Peso (kg)</label><input type="number" id="peso">
+        <label>Altura (cm)</label><input type="number" id="altura">
+        <label>Equipe/Academia</label><input type="text" id="equipe">
+        <label>Objetivo Principal</label><input type="text" id="objetivo">
+        <label>Telefone</label><input type="text" id="telefone">
+        <label>Email (opcional)</label><input type="email" id="email">
+        <label>Foto de Perfil</label><input type="file" id="foto">
 
-    <!-- Campeonatos -->
-    <section id="campeonatos">
-      <h1>🥋 Histórico de Campeonatos</h1>
-      <form id="campeonatosForm">
-        <div class="form-group"><label>Campeonatos já lutou</label><input type="number" id="campeonatosTotal"></div>
-        <div class="form-group"><label>Vitórias</label><input type="number" id="vitorias"></div>
-        <div class="form-group"><label>Derrotas</label><input type="number" id="derrotas"></div>
-        <div class="form-group"><label>Melhor colocação</label><input type="text" id="colocacao"></div>
-        <button type="submit">Salvar</button>
-      </form>
-    </section>
+        <h3>Histórico de Campeonatos</h3>
+        <label>Quantos campeonatos já lutou?</label><input type="number" id="qtdCampeonatos">
+        <label>Vitórias</label><input type="number" id="vitorias">
+        <label>Derrotas</label><input type="number" id="derrotas">
+        <label>Melhor Colocação</label><input type="text" id="melhorColocacao">
+        <label>Última participação</label><input type="text" id="ultimaParticipacao">
 
-    <!-- Treinos -->
-    <section id="treinos">
-      <h1>🏋️ Registro de Treinos</h1>
-      <form id="treinoForm">
-        <div class="form-group"><label>Data</label><input type="date" id="treinoData"></div>
-        <div class="form-group"><label>Duração (min)</label><input type="number" id="treinoDuracao"></div>
-        <div class="form-group"><label>Descrição</label><input type="text" id="treinoDesc"></div>
-        <button type="submit">Adicionar</button>
+        <button type="button" onclick="salvarCadastro()">Salvar Cadastro</button>
       </form>
-      <h3>Histórico</h3>
-      <ul id="listaTreinos"></ul>
-    </section>
+    </div>
+  </section>
 
-    <!-- Metas -->
-    <section id="metas">
-      <h1>🎯 Metas</h1>
-      <form id="metaForm">
-        <div class="form-group"><label>Meta</label><input type="text" id="metaTexto"></div>
-        <div class="form-group"><label>Status</label>
-          <select id="metaStatus">
-            <option value="andamento">Em andamento</option>
-            <option value="concluida">Concluída</option>
-            <option value="atrasada">Atrasada</option>
-          </select>
+  <section id="dashboard" class="section">
+    <div class="card">
+      <h2>Meu Perfil</h2>
+      <div class="profile">
+        <img id="fotoPerfil" src="https://i.pravatar.cc/150" alt="Foto do atleta">
+        <div id="dadosPerfil">
+          <p><b>Nome:</b> João Silva</p>
+          <p><b>Faixa:</b> Azul</p>
+          <p><b>Idade:</b> 27 anos</p>
         </div>
-        <button type="submit">Adicionar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Gráfico de Vitórias x Derrotas</h2>
+      <canvas id="graficoVitorias"></canvas>
+    </div>
+  </section>
+
+  <section id="treinos" class="section">
+    <div class="card">
+      <h2>Agenda de Treinos</h2>
+      <form id="treinoForm">
+        <label for="novoTreino">Adicionar novo treino</label>
+        <input type="text" id="novoTreino" placeholder="Ex: Terça - 20h - Treino de força">
+        <button type="button" onclick="salvarTreino()">Adicionar</button>
       </form>
-      <h3>Lista de Metas</h3>
-      <ul id="listaMetas"></ul>
-    </section>
+      <ul id="listaTreinos">
+        <li>Segunda - 19h - Treino técnico</li>
+        <li>Quarta - 19h - Sparring</li>
+        <li>Sexta - 19h - Treino físico</li>
+        <li>Sábado - 10h - Aula coletiva</li>
+      </ul>
+    </div>
+  </section>
 
-    <!-- Dieta -->
-    <section id="dieta">
-      <h1>🍎 Dieta Interativa</h1>
-      <p>Área de alimentação personalizada em desenvolvimento.</p>
-    </section>
-  </div>
+  <section id="metas" class="section">
+    <div class="card">
+      <h2>Minhas Metas</h2>
+      <form id="metasForm">
+        <label for="novaMeta">Adicionar nova meta</label>
+        <input type="text" id="novaMeta" placeholder="Ex: Ganhar o próximo campeonato">
+        <button type="button" onclick="salvarMeta()">Adicionar</button>
+      </form>
+      <ul id="listaMetas">
+        <li>🏆 Competir no estadual</li>
+        <li>⚡ Melhorar condicionamento físico</li>
+        <li>🥋 Aprender 3 novas finalizações</li>
+      </ul>
+    </div>
+  </section>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <section id="analise" class="section">
+    <div class="card">
+      <h2>Análise de Desempenho</h2>
+      <canvas id="treinoChart"></canvas>
+    </div>
+    <div class="card">
+      <h2>Progresso</h2>
+      <canvas id="progressoChart"></canvas>
+    </div>
+  </section>
+
+  <section id="videos" class="section">
+    <div class="card">
+      <h2>Aulas</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=Y7cKoT0Qx0o" target="_blank">Defesa pessoal</a></li>
+        <li><a href="https://www.youtube.com/watch?v=pHw8MtkG2hU" target="_blank">Finalização arm-lock</a></li>
+        <li><a href="https://www.youtube.com/watch?v=IF2UTK4_EFE" target="_blank">Passagem de guarda</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="chat" class="section">
+    <div class="card">
+      <h2>Chat com o Treinador</h2>
+      <div class="chat-box" id="chatBox">
+        <div class="msg bot">👊 Olá atleta, como foi o treino de hoje?</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Escreva sua mensagem...">
+        <button onclick="sendMessage()">Enviar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="dieta" class="section">
+    <div class="card">
+      <h2>🥗 Dieta Interativa</h2>
+      <form id="dietaForm">
+        <label>Café da Manhã</label><input type="text" id="cafe">
+        <label>Almoço</label><input type="text" id="almoco">
+        <label>Jantar</label><input type="text" id="jantar">
+        <label>Lanches</label><input type="text" id="lanches">
+        <button type="button" onclick="salvarDieta()">Salvar Refeição</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Dicas de Alimentação</h3>
+      <ul id="listaDicas"></ul>
+    </div>
+    <div class="card">
+      <h3>Histórico de Refeições</h3>
+      <ul id="historicoDieta"></ul>
+    </div>
+  </section>
+
+  <section id="contato" class="section">
+    <div class="card">
+      <h2>Contato</h2>
+      <p>📧 suporte@appdoatleta.com</p>
+      <p>📱 WhatsApp: (51) 99999-0000</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 App do Atleta - Dionatan Wiggers</p>
+  </footer>
+
   <script>
     function showSection(id) {
-      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    // LocalStorage helpers
-    function salvarLS(chave, dados) { localStorage.setItem(chave, JSON.stringify(dados)); }
-    function carregarLS(chave) { return JSON.parse(localStorage.getItem(chave) || "[]"); }
+    // Função Salvar Cadastro
+    function salvarCadastro() {
+      const nome = document.getElementById('nome').value;
+      const sobrenome = document.getElementById('sobrenome').value;
+      const idade = document.getElementById('idade').value;
+      const graduacao = document.getElementById('graduacao').value;
+      const vitorias = parseInt(document.getElementById('vitorias').value || 0);
+      const derrotas = parseInt(document.getElementById('derrotas').value || 0);
+      const fotoFile = document.getElementById('foto').files[0];
 
-    // Treinos
-    const treinoForm = document.getElementById("treinoForm");
-    const listaTreinos = document.getElementById("listaTreinos");
-    let treinos = carregarLS("treinos");
+      document.getElementById('dadosPerfil').innerHTML = `
+        <p><b>Nome:</b> ${nome} ${sobrenome}</p>
+        <p><b>Faixa:</b> ${graduacao}</p>
+        <p><b>Idade:</b> ${idade} anos</p>
+      `;
 
-    function renderTreinos() {
-      listaTreinos.innerHTML = "";
-      treinos.forEach(t => {
-        let li = document.createElement("li");
-        li.textContent = `${t.data} - ${t.duracao}min - ${t.desc}`;
+      if(fotoFile){
+        const reader = new FileReader();
+        reader.onload = e => { document.getElementById('fotoPerfil').src = e.target.result; };
+        reader.readAsDataURL(fotoFile);
+      }
+
+      atualizarGrafico(vitorias, derrotas);
+      alert("✅ Cadastro salvo com sucesso!");
+    }
+
+    // Gráfico vitórias
+    let grafico = new Chart(document.getElementById('graficoVitorias'), {
+      type: 'pie',
+      data: { labels: ['Vitórias', 'Derrotas'], datasets: [{ data: [0,0], backgroundColor: ['#4CAF50','#F44336'] }] }
+    });
+    function atualizarGrafico(v, d) { grafico.data.datasets[0].data = [v,d]; grafico.update(); }
+
+    // Gráficos Treino
+    new Chart(document.getElementById('treinoChart'), {
+      type: 'bar',
+      data: { labels: ['Seg', 'Qua', 'Sex', 'Sáb'], datasets: [{ label: 'Horas de treino', data: [2, 3, 1.5, 2.5], backgroundColor: '#FFD700' }] }
+    });
+    new Chart(document.getElementById('progressoChart'), {
+      type: 'line',
+      data: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], datasets: [{ label: 'Performance', data: [10, 20, 35, 50, 65], borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.2)', fill: true, tension: 0.3 }] }
+    });
+
+    // Chat
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const chatBox = document.getElementById('chatBox');
+      const msg = input.value.trim();
+      if(msg !== "") {
+        const userMsg = document.createElement('div'); userMsg.className = "msg user"; userMsg.textContent = msg; chatBox.appendChild(userMsg);
+        setTimeout(() => {
+          const botMsg = document.createElement('div'); botMsg.className = "msg bot"; botMsg.textContent = "👍 Boa! Continue focado!"; chatBox.appendChild(botMsg); chatBox.scrollTop = chatBox.scrollHeight;
+        }, 1000);
+        input.value = ""; chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    // 📦 PACOTE 2: Dieta
+    const dicas = [
+      "🍎 Inclua frutas no café da manhã",
+      "💧 Beba pelo menos 2L de água por dia",
+      "🥦 Priorize vegetais no almoço e jantar",
+      "🍗 Prefira proteínas magras (frango, peixe)",
+      "🚫 Evite refrigerantes e frituras"
+    ];
+    const listaDicas = document.getElementById("listaDicas");
+    dicas.forEach(d => { const li = document.createElement("li"); li.innerText = d; listaDicas.appendChild(li); });
+
+    function salvarDieta() {
+      const refeicao = {
+        cafe: document.getElementById("cafe").value,
+        almoco: document.getElementById("almoco").value,
+        jantar: document.getElementById("jantar").value,
+        lanches: document.getElementById("lanches").value,
+        data: new Date().toLocaleDateString()
+      };
+      const historico = document.getElementById("historicoDieta");
+      const li = document.createElement("li");
+      li.textContent = `${refeicao.data} - Café: ${refeicao.cafe}, Almoço: ${refeicao.almoco}, Jantar: ${refeicao.jantar}, Lanches: ${refeicao.lanches}`;
+      historico.appendChild(li);
+      alert("✅ Refeição salva!");
+    }
+
+    // NOVAS FUNÇÕES ADICIONADAS
+    function salvarTreino() {
+      const inputTreino = document.getElementById('novoTreino');
+      const listaTreinos = document.getElementById('listaTreinos');
+      const novoTreinoTexto = inputTreino.value.trim();
+
+      if (novoTreinoTexto !== "") {
+        const li = document.createElement('li');
+        li.textContent = novoTreinoTexto;
         listaTreinos.appendChild(li);
-      });
-      salvarLS("treinos", treinos);
-      atualizarGraficos();
+        inputTreino.value = "";
+        alert("✅ Treino adicionado!");
+      } else {
+        alert("Por favor, digite o treino que deseja adicionar.");
+      }
     }
-    treinoForm.addEventListener("submit", e => {
-      e.preventDefault();
-      treinos.push({ data: treinoForm.treinoData.value, duracao: treinoForm.treinoDuracao.value, desc: treinoForm.treinoDesc.value });
-      renderTreinos();
-      treinoForm.reset();
-    });
-    renderTreinos();
 
-    // Metas
-    const metaForm = document.getElementById("metaForm");
-    const listaMetas = document.getElementById("listaMetas");
-    let metas = carregarLS("metas");
+    function salvarMeta() {
+      const inputMeta = document.getElementById('novaMeta');
+      const listaMetas = document.getElementById('listaMetas');
+      const novaMetaTexto = inputMeta.value.trim();
 
-    function renderMetas() {
-      listaMetas.innerHTML = "";
-      metas.forEach(m => {
-        let li = document.createElement("li");
-        li.textContent = `${m.texto} - ${m.status}`;
+      if (novaMetaTexto !== "") {
+        const li = document.createElement('li');
+        li.textContent = "✔ " + novaMetaTexto;
         listaMetas.appendChild(li);
-      });
-      salvarLS("metas", metas);
-      atualizarGraficos();
+        inputMeta.value = "";
+        alert("✅ Meta adicionada!");
+      } else {
+        alert("Por favor, digite a meta que deseja adicionar.");
+      }
     }
-    metaForm.addEventListener("submit", e => {
-      e.preventDefault();
-      metas.push({ texto: metaForm.metaTexto.value, status: metaForm.metaStatus.value });
-      renderMetas();
-      metaForm.reset();
-    });
-    renderMetas();
-
-    // Gráficos
-    const graficoVitorias = new Chart(document.getElementById("graficoVitorias"), {
-      type: "pie",
-      data: { labels: ["Vitórias", "Derrotas"], datasets: [{ data: [5, 2], backgroundColor: ["#FFD700", "#000"] }] }
-    });
-
-    const graficoTreinos = new Chart(document.getElementById("graficoTreinos"), {
-      type: "bar",
-      data: { labels: treinos.map(t => t.data), datasets: [{ label: "Duração (min)", data: treinos.map(t => t.duracao), backgroundColor: "#FFD700" }] }
-    });
-
-    const graficoMetas = new Chart(document.getElementById("graficoMetas"), {
-      type: "doughnut",
-      data: { labels: ["Concluídas", "Em andamento", "Atrasadas"], datasets: [{ data: [0,0,0], backgroundColor: ["#FFD700","#000","#ccc"] }] }
-    });
-
-    function atualizarGraficos() {
-      graficoTreinos.data.labels = treinos.map(t => t.data);
-      graficoTreinos.data.datasets[0].data = treinos.map(t => t.duracao);
-      graficoTreinos.update();
-
-      let concl = metas.filter(m => m.status==="concluida").length;
-      let and = metas.filter(m => m.status==="andamento").length;
-      let atr = metas.filter(m => m.status==="atrasada").length;
-      graficoMetas.data.datasets[0].data = [concl,and,atr];
-      graficoMetas.update();
-    }
-    atualizarGraficos();
   </script>
 </body>
 </html>
