@@ -4,104 +4,170 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App do Atleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
+    :root {
+      --primary: #FFD700; /* Ouro = campeão */
+      --dark: #0d0d0d;
+      --light: #ffffff;
+      --accent: #ff4141;
+    }
+
+    * {
       margin: 0;
-      font-family: 'Arial', sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--light);
+      text-align: center;
       overflow: hidden;
-      background: linear-gradient(135deg, #0d0d0d, #1a1a1a, #000);
-      height: 100vh;
+    }
+
+    /* Splash */
+    #splash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a, #262626);
+      background-size: 300% 300%;
+      animation: gradientMove 6s infinite, fadeOut 1s ease forwards 4s;
     }
 
-    /* SPLASH */
-    #splash {
-      text-align: center;
-      color: #fff;
-      position: relative;
-      width: 100%;
-      height: 100%;
+    #splash .icon {
+      font-size: 5rem;
+      animation: float 3s ease-in-out infinite;
+      text-shadow: 0 0 20px var(--primary), 0 0 40px var(--accent);
+      transform: perspective(500px) rotateX(10deg);
     }
 
     #splash h1 {
-      font-size: 2rem;
-      margin-top: 20px;
-      text-shadow: 0 0 10px gold, 0 0 20px #ffcc00;
-      animation: fadeIn 2s ease-in-out;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 15px;
+      background: linear-gradient(90deg, var(--primary), #fff, var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: shine 3s linear infinite;
     }
 
     #splash p {
-      font-size: 1.1rem;
-      margin-top: 10px;
-      color: #ccc;
-      animation: fadeIn 3s ease-in-out;
+      font-size: 1rem;
+      margin-top: 8px;
+      color: #aaa;
     }
 
-    /* Ícone central */
-    #splash .icon {
-      font-size: 4rem;
-      margin-top: 100px;
-      animation: pulse 2s infinite;
-      z-index: 2;
-      position: relative;
+    /* Fundo gradiente em movimento */
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-
-    /* Orbit container */
-    .orbit {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 300px;
-      height: 300px;
-      margin-left: -150px;
-      margin-top: -150px;
-      border-radius: 50%;
-      animation: spin 15s linear infinite;
-    }
-
-    /* Logos orbitando */
-    .orbit img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      position: absolute;
-      filter: drop-shadow(0 0 12px rgba(255,255,255,0.8));
-    }
-
-    .orbit img:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
-    .orbit img:nth-child(2) { right: 0; top: 50%; transform: translateY(-50%); }
-    .orbit img:nth-child(3) { bottom: 0; left: 50%; transform: translateX(-50%); }
-    .orbit img:nth-child(4) { left: 0; top: 50%; transform: translateY(-50%); }
 
     /* Animações */
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotateY(0deg); }
+      50% { transform: translateY(-20px) rotateY(10deg); }
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+    @keyframes shine {
+      from { background-position: -200px; }
+      to { background-position: 200px; }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #007bff, #00d4ff);
+      color: var(--light);
+      padding: 40px 20px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      margin-top: -20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    /* Main */
+    main {
+      margin: 40px auto;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    a {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 25px 15px;
+      background: #1c1c1c;
+      color: var(--light);
+      text-decoration: none;
+      border-radius: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+    }
+
+    a:hover {
+      transform: translateY(-6px) scale(1.05);
+      background: linear-gradient(135deg, #007bff, #00d4ff);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+
+    a span {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      #splash h1 { font-size: 1.4rem; }
+      #splash p { font-size: 0.9rem; }
+      .icon { font-size: 3.5rem; }
+      main { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
+  <!-- Splash -->
   <div id="splash">
-    <div class="orbit">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Gracie_Barra_logo.png" alt="Gracie Barra">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/37/Alliance_Jiu_Jitsu_logo.png" alt="Alliance">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Checkmat_logo.png" alt="Checkmat">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/Atos_Jiu_Jitsu_logo.png" alt="Atos">
-    </div>
     <div class="icon">🥋</div>
     <h1>Bem-vindo ao App do Campeão</h1>
     <p>Jiu-Jitsu • Força • Disciplina</p>
   </div>
+
+  <!-- Conteúdo principal -->
+  <header>
+    <h1>App do Atleta</h1>
+    <p>Seu centro completo de performance</p>
+  </header>
+  <main>
+    <a href="cadastro.html"><span>📋</span>Cadastro</a>
+    <a href="dashboard.html"><span>📊</span>Dashboard</a>
+    <a href="tecnicas.html"><span>🥋</span>Técnicas</a>
+    <a href="dieta.html"><span>🍎</span>Dieta</a>
+    <a href="analise.html"><span>🎥</span>Análise</a>
+    <a href="preparacao.html"><span>💪</span>Preparação Física</a>
+  </main>
 </body>
 </html>
