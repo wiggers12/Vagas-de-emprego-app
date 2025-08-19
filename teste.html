@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App do Atleta - Jiu-Jitsu</title>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Importa os módulos Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
+      authDomain: "vagas-de-emprego-app.firebaseapp.com",
+      projectId: "vagas-de-emprego-app",
+      storageBucket: "vagas-de-emprego-app.appspot.com", // corrigido
+      messagingSenderId: "301719945007",
+      appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
+      measurementId: "G-JRJBBRWG2R"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Enviar cadastro para Firestore
+    async function salvarCadastro(e) {
+      e.preventDefault();
+
+      const formData = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        sexo: document.getElementById("sexo").value,
+        cpf: document.getElementById("cpf").value,
+        telefone: document.getElementById("telefone").value,
+        email: document.getElementById("email").value,
+        faixa: document.getElementById("faixa").value,
+        academia: document.getElementById("academia").value,
+        tempo: document.getElementById("tempo").value,
+        peso: document.getElementById("peso").value,
+        altura: document.getElementById("altura").value,
+        gordura: document.getElementById("gordura").value,
+        medidas: document.getElementById("medidas").value,
+        dieta: document.getElementById("dieta").value,
+        restricoes: document.getElementById("restricoes").value,
+        suplementos: document.getElementById("suplementos").value,
+        historico: document.getElementById("historico").value,
+        lesoes: document.getElementById("lesoes").value,
+        objetivos: document.getElementById("objetivos").value,
+        dataCadastro: new Date().toISOString()
+      };
+
+      try {
+        await addDoc(collection(db, "atletas"), formData);
+        alert("✅ Cadastro salvo com sucesso!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        alert("❌ Erro ao salvar: " + error);
+      }
+    }
+
+    window.salvarCadastro = salvarCadastro;
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #fff;
+    }
+    header {
+      background: #FFD700;
+      color: #111;
+      text-align: center;
+      padding: 20px;
+    }
+    section {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #222;
+      border-radius: 12px;
+    }
+    h2, h3 {
+      color: #FFD700;
+    }
+    form {
+      display: grid;
+      gap: 15px;
+    }
+    input, select, textarea {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      width: 100%;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #FFD700;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #fff;
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🥋 App do Atleta - Jiu-Jitsu</h1>
+    <p>Controle completo de cadastro, performance e evolução</p>
+  </header>
+
+  <section>
+    <h2>Cadastro do Atleta</h2>
+    <form onsubmit="salvarCadastro(event)">
+      <!-- Dados Pessoais -->
+      <h3>Dados Pessoais</h3>
+      <input id="nome" type="text" placeholder="Nome Completo" required>
+      <input id="idade" type="number" placeholder="Idade" required>
+      <select id="sexo">
+        <option>Masculino</option>
+        <option>Feminino</option>
+        <option>Outro</option>
+      </select>
+      <input id="cpf" type="text" placeholder="CPF">
+      <input id="telefone" type="tel" placeholder="Telefone/WhatsApp">
+      <input id="email" type="email" placeholder="E-mail">
+
+      <!-- Graduação -->
+      <h3>Graduação</h3>
+      <select id="faixa">
+        <option>Branca</option>
+        <option>Azul</option>
+        <option>Roxa</option>
+        <option>Marrom</option>
+        <option>Preta</option>
+      </select>
+      <input id="academia" type="text" placeholder="Professor/Academia">
+      <input id="tempo" type="number" placeholder="Tempo de treino (anos)">
+
+      <!-- Dados Físicos -->
+      <h3>Dados Físicos</h3>
+      <input id="peso" type="number" placeholder="Peso (kg)">
+      <input id="altura" type="number" placeholder="Altura (cm)">
+      <input id="gordura" type="number" placeholder="Percentual de gordura (%)">
+      <textarea id="medidas" placeholder="Medidas corporais (ex: bíceps, abdômen, coxa)"></textarea>
+
+      <!-- Nutrição -->
+      <h3>Informações Nutricionais</h3>
+      <textarea id="dieta" placeholder="Tipo de dieta"></textarea>
+      <textarea id="restricoes" placeholder="Restrições alimentares"></textarea>
+      <textarea id="suplementos" placeholder="Suplementação"></textarea>
+
+      <!-- Histórico -->
+      <h3>Histórico Esportivo</h3>
+      <textarea id="historico" placeholder="Competições e títulos"></textarea>
+      <textarea id="lesoes" placeholder="Lesões anteriores"></textarea>
+
+      <!-- Objetivos -->
+      <h3>Objetivos</h3>
+      <textarea id="objetivos" placeholder="Quais são seus principais objetivos?"></textarea>
+
+      <button type="submit">Salvar Cadastro</button>
+    </form>
+  </section>
+</body>
+</html>
