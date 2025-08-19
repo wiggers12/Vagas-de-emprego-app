@@ -26,256 +26,8 @@
     .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.4s ease;}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
     .card{padding:10px;border:1px solid #ddd;border-radius:6px;text-align:center;cursor:pointer;}
-    button{background:var(--primary);color:var(--light);padding:10px 15px;border:none;
-      border-radius:6px;cursor:pointer;margin-top:5px;}
-    button:hover{background:#218838;}
-    input,select{padding:8px;width:100%;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;}
-    table{width:100%;border-collapse:collapse;margin-top:10px;}
-    table,th,td{border:1px solid #ddd;}
-    th,td{padding:8px;text-align:center;}
-    canvas{max-width:100%;margin:10px 0;}
-  </style>
-</head>
-<body>
-<header>
-  <h1>Nutrição Esportiva</h1>
-  <p>Seu painel alimentar completo</p>
-</header>
-<main>
-  <!-- Cadastro -->
-  <section>
-    <h2>📋 Cadastro Nutricional</h2>
-    <form id="formCadastro">
-      <input type="text" id="nome" placeholder="Nome" required>
-      <input type="number" id="idade" placeholder="Idade" required>
-      <input type="number" id="altura" placeholder="Altura (cm)" required>
-      <input type="number" id="peso" placeholder="Peso (kg)" required>
-      <select id="sexo" required>
-        <option value="">Sexo</option>
-        <option>Masculino</option>
-        <option>Feminino</option>
-      </select>
-      <select id="atividade" required>
-        <option value="">Nível de atividade</option>
-        <option>Sedentário</option>
-        <option>Moderado</option>
-        <option>Intenso</option>
-      </select>
-      <select id="objetivo" required>
-        <option value="">Objetivo</option>
-        <option>Ganho de massa</option>
-        <option>Perda de peso</option>
-        <option>Manutenção</option>
-        <option>Performance</option>
-      </select>
-      <button type="submit">Salvar Cadastro</button>
-    </form>
-    <p id="resultadoCadastro"></p>
-  </section>
-
-  <!-- Banco de Alimentos -->
-  <section>
-    <h2>🥦 Banco de Alimentos</h2>
-    <input type="text" id="buscaAlimento" placeholder="Pesquisar alimento...">
-    <div id="listaAlimentos" class="grid"></div>
-  </section>
-
-  <!-- Plano Alimentar -->
-  <section>
-    <h2>🥗 Plano Alimentar Diário</h2>
-    <form id="formRefeicao">
-      <input type="text" id="alimento" placeholder="Alimento">
-      <input type="number" id="calorias" placeholder="Calorias">
-      <input type="number" id="proteina" placeholder="Proteínas (g)">
-      <input type="number" id="carbo" placeholder="Carboidratos (g)">
-      <input type="number" id="gordura" placeholder="Gorduras (g)">
-      <button type="submit">Adicionar</button>
-    </form>
-    <table>
-      <thead>
-        <tr>
-          <th>Alimento</th><th>Calorias</th><th>P</th><th>C</th><th>G</th><th>Ação</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaRefeicoes"></tbody>
-    </table>
-    <div class="progress-bar"><div class="progress-fill" id="progressRefeicao"></div></div>
-  </section>
-
-  <!-- Macros -->
-  <section>
-    <h2>⚡ Macros e Calorias</h2>
-    <canvas id="chartMacros"></canvas>
-    <canvas id="chartCalorias"></canvas>
-    <canvas id="chartComparativo"></canvas>
-  </section>
-
-  <!-- Evolução corporal -->
-  <section>
-    <h2>📈 Evolução Corporal</h2>
-    <canvas id="chartPeso"></canvas>
-    <canvas id="chartMedidas"></canvas>
-  </section>
-
-  <!-- Hidratação -->
-  <section>
-    <h2>💧 Hidratação</h2>
-    <p id="metaAgua">Meta: 3L/dia</p>
-    <div class="progress-bar"><div class="progress-fill" id="aguaProgress"></div></div>
-    <button onclick="beberAgua()">Beber 250ml</button>
-  </section>
-
-  <!-- Suplementação -->
-  <section>
-    <h2>💊 Suplementação</h2>
-    <div class="grid" id="listaSuplementos">
-      <div class="card" onclick="toggleCheck(this)">Whey Protein</div>
-      <div class="card" onclick="toggleCheck(this)">Creatina</div>
-      <div class="card" onclick="toggleCheck(this)">BCAA</div>
-      <div class="card" onclick="toggleCheck(this)">Cafeína</div>
-    </div>
-  </section>
-
-  <!-- Receitas -->
-  <section>
-    <h2>🍳 Receitas Fitness</h2>
-    <div class="grid">
-      <div class="card">Panqueca de aveia<br><small>20g proteína</small></div>
-      <div class="card">Shake pós-treino<br><small>30g proteína</small></div>
-      <div class="card">Frango + Batata Doce<br><small>500 kcal</small></div>
-    </div>
-  </section>
-
-  <!-- Gamificação -->
-  <section>
-    <h2>🏆 Gamificação</h2>
-    <p>Pontos: <span id="pontos">0</span></p>
-    <p>Conquistas: <span id="conquistas">Nenhuma</span></p>
-  </section>
-</main>
-
-<script>
-let refeicoes=[];let agua=0;let pontos=0;
-
-// Cadastro
-document.getElementById("formCadastro").addEventListener("submit",e=>{
-  e.preventDefault();
-  const nome=document.getElementById("nome").value;
-  const peso=document.getElementById("peso").value;
-  const altura=document.getElementById("altura").value/100;
-  const idade=document.getElementById("idade").value;
-  let imc=(peso/(altura*altura)).toFixed(1);
-  document.getElementById("resultadoCadastro").innerText=`${nome}, seu IMC é ${imc}.`;
-});
-
-// Banco de alimentos (mini-base)
-const alimentos=[ 
-  {nome:"Arroz",cal:130,prot:2,carb:28,gord:0}, 
-  {nome:"Frango",cal:165,prot:31,carb:0,gord:3},
-  {nome:"Ovo",cal:70,prot:6,carb:0,gord:5},
-  {nome:"Batata Doce",cal:86,prot:1,carb:20,gord:0}
-];
-function renderBanco(filtro=""){
-  let div=document.getElementById("listaAlimentos");
-  div.innerHTML="";
-  alimentos.filter(a=>a.nome.toLowerCase().includes(filtro.toLowerCase()))
-    .forEach(a=>{
-      div.innerHTML+=`<div class="card" onclick="addRefeicaoBanco('${a.nome}',${a.cal},${a.prot},${a.carb},${a.gord})">
-        ${a.nome}<br><small>${a.cal}kcal</small></div>`;
-    });
-}
-document.getElementById("buscaAlimento").addEventListener("input",e=>renderBanco(e.target.value));
-renderBanco();
-function addRefeicaoBanco(n,c,p,ca,g){
-  refeicoes.push({alimento:n,calorias:c,proteina:p,carbo:ca,gordura:g});
-  renderTabela();
-}
-
-// Refeições
-document.getElementById("formRefeicao").addEventListener("submit",e=>{
-  e.preventDefault();
-  let alimento=document.getElementById("alimento").value;
-  let calorias=+document.getElementById("calorias").value;
-  let proteina=+document.getElementById("proteina").value;
-  let carbo=+document.getElementById("carbo").value;
-  let gordura=+document.getElementById("gordura").value;
-  refeicoes.push({alimento,calorias,proteina,carbo,gordura});
-  renderTabela();
-});
-
-function renderTabela(){
-  let tabela=document.getElementById("tabelaRefeicoes");
-  tabela.innerHTML="";
-  let totalC=0,totalP=0,totalCa=0,totalG=0;
-  refeicoes.forEach((r,i)=>{
-    totalC+=r.calorias;totalP+=r.proteina;totalCa+=r.carbo;totalG+=r.gordura;
-    tabela.innerHTML+=`<tr>
-      <td>${r.alimento}</td><td>${r.calorias}</td><td>${r.proteina}</td>
-      <td>${r.carbo}</td><td>${r.gordura}</td>
-      <td><button onclick="removerRefeicao(${i})">X</button></td></tr>`;
-  });
-  atualizarGraficos(totalC,totalP,totalCa,totalG);
-}
-function removerRefeicao(i){refeicoes.splice(i,1);renderTabela();}
-
-// Hidratação
-function beberAgua(){
-  agua+=0.25;let percent=(agua/3)*100;if(percent>100)percent=100;
-  document.getElementById("aguaProgress").style.width=percent+"%";
-}
-
-// Suplementação
-function toggleCheck(el){el.style.background=el.style.background?"":"#c3f7cf";pontos+=5;atualizarPontos();}
-
-// Gamificação
-function atualizarPontos(){document.getElementById("pontos").textContent=pontos;
-if(pontos>=50)document.getElementById("conquistas").innerText="Atleta dedicado";}
-
-// Gráficos
-let chartMacros=new Chart(document.getElementById("chartMacros"),{
-  type:"pie",data:{labels:["Proteínas","Carbo","Gorduras"],datasets:[{data:[0,0,0],backgroundColor:["#28a745","#007bff","#ffc107"]}]}
-});
-let chartCalorias=new Chart(document.getElementById("chartCalorias"),{
-  type:"bar",data:{labels:["Meta","Consumido"],datasets:[{label:"Calorias",data:[2500,0],backgroundColor:["#007bff","#28a745"]}]}
-});
-let chartComparativo=new Chart(document.getElementById("chartComparativo"),{
-  type:"line",data:{labels:["Seg","Ter","Qua","Qui","Sex"],datasets:[{label:"Kcal consumidas",data:[0,0,0,0,0],borderColor:"#ff5733",fill:false}]}
-});
-let chartPeso=new Chart(document.getElementById("chartPeso"),{
-  type:"line",data:{labels:["Sem1","Sem2","Sem3","Sem4"],datasets:[{label:"Peso",data:[80,79,78,77],borderColor:"#28a745",fill:false}]}
-});
-let chartMedidas=new Chart(document.getElementById("chartMedidas"),{
-  type:"line",data:{labels:["Cintura","Peito","Braço"],datasets:[{label:"Medidas cm",data:[90,100,40],borderColor:"#007bff",fill:false}]}
-});<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App do Atleta - Nutrição Esportiva</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --primary: #28a745;
-      --dark: #111;
-      --light: #fff;
-      --gray: #f5f5f5;
-      --accent: #007bff;
-    }
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
-    body{background:var(--gray);color:var(--dark);}
-    header{background:var(--dark);color:var(--light);padding:20px;text-align:center;}
-    header h1{font-size:1.8rem;}
-    main{padding:20px;max-width:1200px;margin:auto;}
-    section{background:var(--light);padding:15px;border-radius:8px;margin-bottom:20px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-    h2{margin-bottom:10px;color:var(--primary);font-size:1.3rem;}
-    .progress-bar{height:20px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:10px;}
-    .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.4s ease;}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
-    .card{padding:10px;border:1px solid #ddd;border-radius:6px;text-align:center;cursor:pointer;}
-    button{background:var(--primary);color:var(--light);padding:8px 12px;border:none;
-      border-radius:6px;cursor:pointer;margin:3px;}
+    button{background:var(--primary);color:var(--light);padding:6px 10px;border:none;
+      border-radius:6px;cursor:pointer;margin:2px;}
     button:hover{background:#218838;}
     input,select{padding:8px;width:100%;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;}
     table{width:100%;border-collapse:collapse;margin-top:10px;}
@@ -398,7 +150,7 @@ let chartMedidas=new Chart(document.getElementById("chartMedidas"),{
 </main>
 
 <script>
-let refeicoes=[];let agua=0;let pontos=0;
+let refeicoes=[], agua=0, pontos=0;
 let alimentos=[
   {nome:"Arroz",cal:130,prot:2,carb:28,gord:0}, 
   {nome:"Frango",cal:165,prot:31,carb:0,gord:3},
@@ -438,12 +190,12 @@ function renderBanco(filtro=""){
 }
 document.getElementById("buscaAlimento").addEventListener("input",e=>renderBanco(e.target.value));
 renderBanco();
-function addRefeicaoBanco(i){let a=alimentos[i];refeicoes.push({alimento:a.nome,calorias:a.cal,proteina:a.prot,carbo:a.carb,gordura:a.gord});renderTabela();}
+function addRefeicaoBanco(i){let a=alimentos[i];refeicoes.push({...a,alimento:a.nome});renderTabela();}
 function adicionarAlimento(){let nome=prompt("Nome do alimento:");let cal=+prompt("Calorias:");let p=+prompt("Proteína:");let c=+prompt("Carbo:");let g=+prompt("Gordura:");if(nome)alimentos.push({nome,cal,prot:p,carb:c,gord:g});renderBanco();}
 function editarAlimento(i){let a=alimentos[i];a.nome=prompt("Nome:",a.nome);a.cal=+prompt("Calorias:",a.cal);a.prot=+prompt("Proteínas:",a.prot);a.carb=+prompt("Carbo:",a.carb);a.gord=+prompt("Gordura:",a.gord);renderBanco();}
 function removerAlimento(i){alimentos.splice(i,1);renderBanco();}
 
-// Refeições
+// Plano alimentar
 document.getElementById("formRefeicao").addEventListener("submit",e=>{
   e.preventDefault();
   let a={alimento:document.getElementById("alimento").value,
@@ -470,9 +222,9 @@ function editarRefeicao(i){let r=refeicoes[i];r.alimento=prompt("Alimento:",r.al
 function beberAgua(){agua+=0.25;let meta=document.getElementById("metaLitros").value;let percent=(agua/meta)*100;if(percent>100)percent=100;document.getElementById("aguaProgress").style.width=percent+"%";document.getElementById("metaAgua").innerText=`Meta: ${meta}L/dia | Já ingerido: ${agua.toFixed(1)}L`;}
 
 // Suplementos
-function renderSuplementos(){let div=document.getElementById("listaSuplementos");div.innerHTML="";suplementos.forEach((s,i)=>{div.innerHTML+=`<div class="card" onclick="toggleCheck(this)">
-        ${s}<br><button onclick="event.stopPropagation();editarSuplemento(${i})">Editar</button>
-        <button onclick="event.stopPropagation();removerSuplemento(${i})">X</button></div>`;});}
+function renderSuplementos(){let div=document.getElementById("listaSuplementos");div.innerHTML="";suplementos.forEach((s,i)=>{div.innerHTML+=`<div class="card">
+        ${s}<br><button onclick="editarSuplemento(${i})">Editar</button>
+        <button onclick="removerSuplemento(${i})">X</button></div>`;});}
 function novoSuplemento(){let s=prompt("Nome do suplemento:");if(s)suplementos.push(s);renderSuplementos();}
 function editarSuplemento(i){suplementos[i]=prompt("Editar suplemento:",suplementos[i]);renderSuplementos();}
 function removerSuplemento(i){suplementos.splice(i,1);renderSuplementos();}
@@ -488,7 +240,6 @@ function removerReceita(i){receitas.splice(i,1);renderReceitas();}
 renderReceitas();
 
 // Gamificação
-function toggleCheck(el){el.style.background=el.style.background?"":"#c3f7cf";pontos+=5;atualizarPontos();}
 function atualizarPontos(){document.getElementById("pontos").textContent=pontos;if(pontos>=50)document.getElementById("conquistas").innerText="Atleta dedicado";}
 
 // Gráficos
@@ -497,15 +248,6 @@ let chartCalorias=new Chart(document.getElementById("chartCalorias"),{type:"bar"
 let chartComparativo=new Chart(document.getElementById("chartComparativo"),{type:"line",data:{labels:["Seg","Ter","Qua","Qui","Sex"],datasets:[{label:"Kcal consumidas",data:[0,0,0,0,0],borderColor:"#ff5733",fill:false}]}});
 let chartPeso=new Chart(document.getElementById("chartPeso"),{type:"line",data:{labels:["Sem1","Sem2","Sem3","Sem4"],datasets:[{label:"Peso",data:[80,79,78,77],borderColor:"#28a745",fill:false}]}});
 let chartMedidas=new Chart(document.getElementById("chartMedidas"),{type:"line",data:{labels:["Cintura","Peito","Braço"],datasets:[{label:"Medidas cm",data:[90,100,40],borderColor:"#007bff",fill:false}]}});
-
-function atualizarGraficos(cal,prot,carbo,gord){
-  chartMacros.data.datasets[0].data=[prot,carbo,gord];chartMacros.update();
-  chartCalorias.data.datasets[0].data=[2500,cal];chartCalorias.update();
-  chartComparativo.data.datasets[0].data=[2000,2100,cal,1800,2200];chartComparativo.update();
-}
-</script>
-</body>
-</html>
 
 function atualizarGraficos(cal,prot,carbo,gord){
   chartMacros.data.datasets[0].data=[prot,carbo,gord];chartMacros.update();
