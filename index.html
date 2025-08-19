@@ -3,285 +3,408 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App do Atleta - Jiu-Jitsu</title>
+  <title>App de Atletas</title>
+  <!-- Firebase -->
+  <script type="module">
+    // Import SDK Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-  <!-- Fonte e Gráficos -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
+      authDomain: "vagas-de-emprego-app.firebaseapp.com",
+      projectId: "vagas-de-emprego-app",
+      storageBucket: "vagas-de-emprego-app.firebasestorage.app",
+      messagingSenderId: "301719945007",
+      appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
+      measurementId: "G-JRJBBRWG2R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    window.db = db;
+    window.storage = storage;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.updateDoc = updateDoc;
+    window.doc = doc;
+    window.ref = ref;
+    window.uploadBytes = uploadBytes;
+    window.getDownloadURL = getDownloadURL;
+  </script>
 
   <style>
-    :root {
-      --primary: #FFD700; /* Amarelo ouro */
-      --dark: #111;       /* Preto */
-      --light: #fff;      /* Branco */
-      --gray: #f5f5f5;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-    body { background: var(--gray); color: var(--dark); }
-    header { background: var(--dark); color: var(--primary); padding: 15px; text-align: center; }
-    nav { display: flex; justify-content: space-around; background: var(--primary); padding: 10px; }
-    nav button { background: none; border: none; color: var(--dark); font-weight: 600; cursor: pointer; transition: 0.3s; }
-    nav button:hover { color: var(--light); }
-    .section { display: none; padding: 20px; animation: fadeIn 0.4s ease-in-out; }
-    .active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .card { background: var(--light); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    h2 { margin-bottom: 10px; color: var(--primary); }
-    .profile { display: flex; align-items: center; gap: 15px; }
-    .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); }
-    ul { list-style: none; margin-top: 10px; }
-    ul li { padding: 8px; border-bottom: 1px solid #ddd; }
-    footer { background: var(--dark); color: var(--primary); text-align: center; padding: 10px; margin-top: 20px; }
-    /* Chat */
-    .chat-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
-    .msg { margin: 5px 0; padding: 8px; border-radius: 6px; max-width: 70%; }
-    .msg.user { background: var(--primary); color: var(--dark); margin-left: auto; }
-    .msg.bot { background: var(--dark); color: var(--primary); margin-right: auto; }
-    .chat-input { display: flex; gap: 10px; }
-    .chat-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    .chat-input button { background: var(--primary); border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--dark); }
-    /* Formulário Cadastro */
-    form label { font-weight: 600; display: block; margin-top: 10px; }
-    form input, form select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-top: 5px; }
-    form button { margin-top: 15px; background: var(--primary); border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    form button:hover { background: #e6c200; }
+    header {
+      background: #FFD700; /* amarelo */
+      color: #000;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    /* Menu lateral */
+    .sidebar {
+      height: 100%;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #000;
+      color: #fff;
+      padding-top: 60px;
+      transform: translateX(-250px);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .sidebar a {
+      display: block;
+      color: #FFD700;
+      padding: 15px;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
+      background: #333;
+    }
+
+    .menu-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #000;
+    }
+
+    main {
+      margin-left: 0;
+      padding: 20px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background: #FFD700;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #e6c200;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>🥋 App do Atleta</h1>
-    <p>Sua jornada no Jiu-Jitsu</p>
+    <span class="menu-btn" onclick="toggleMenu()">☰</span>
+    App de Atletas
   </header>
 
-  <nav>
-    <button onclick="showSection('home')">Início</button>
-    <button onclick="showSection('cadastro')">Cadastro</button>
-    <button onclick="showSection('dashboard')">Dashboard</button>
-    <button onclick="showSection('treinos')">Treinos</button>
-    <button onclick="showSection('metas')">Metas</button>
-    <button onclick="showSection('analise')">Análise</button>
-    <button onclick="showSection('videos')">Vídeos</button>
-    <button onclick="showSection('chat')">Chat</button>
-    <button onclick="showSection('contato')">Contato</button>
-  </nav>
+  <!-- Menu lateral -->
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="showSection('cadastro')">Cadastro Atleta</a>
+    <a href="#" onclick="showSection('campeonatos')">Campeonatos</a>
+    <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+    <a href="#" onclick="showSection('dieta')">Dieta Interativa</a>
+  </div>
 
-  <!-- Início -->
-  <section id="home" class="section active">
-    <div class="card">
-      <h2>Bem-vindo!</h2>
-      <p>Organize seus treinos, acompanhe sua evolução e melhore sua performance no Jiu-Jitsu com este app completo.</p>
-    </div>
-  </section>
-
-  <!-- Cadastro (Pacote 1) -->
-  <section id="cadastro" class="section">
-    <div class="card">
+  <main>    <!-- 📦 Pacote 1 - Cadastro do Atleta -->
+    <section id="cadastro" class="content-section active">
       <h2>Cadastro do Atleta</h2>
-      <form id="cadastroForm">
-        <label>Nome</label><input type="text" id="nome">
-        <label>Sobrenome</label><input type="text" id="sobrenome">
-        <label>Idade</label><input type="number" id="idade">
-        <label>Graduação (faixa)</label><input type="text" id="graduacao">
-        <label>Tempo de treino (anos)</label><input type="number" id="tempoTreino">
-        <label>Peso (kg)</label><input type="number" id="peso">
-        <label>Altura (cm)</label><input type="number" id="altura">
-        <label>Equipe/Academia</label><input type="text" id="equipe">
-        <label>Objetivo Principal</label><input type="text" id="objetivo">
-        <label>Telefone</label><input type="text" id="telefone">
-        <label>Email (opcional)</label><input type="email" id="email">
-        <label>Foto de Perfil</label><input type="file" id="foto">
-
-        <h3>Histórico de Campeonatos</h3>
-        <label>Quantos campeonatos já lutou?</label><input type="number" id="qtdCampeonatos">
-        <label>Vitórias</label><input type="number" id="vitorias">
-        <label>Derrotas</label><input type="number" id="derrotas">
-        <label>Melhor Colocação</label><input type="text" id="melhorColocacao">
-        <label>Última participação</label><input type="text" id="ultimaParticipacao">
-
-        <button type="button" onclick="salvarCadastro()">Salvar Cadastro</button>
-      </form>
-    </div>
-  </section>
-
-  <!-- Dashboard -->
-  <section id="dashboard" class="section">
-    <div class="card">
-      <h2>Meu Perfil</h2>
-      <div class="profile">
-        <img id="fotoPerfil" src="https://i.pravatar.cc/150" alt="Foto do atleta">
-        <div id="dadosPerfil">
-          <p><b>Nome:</b> João Silva</p>
-          <p><b>Faixa:</b> Azul</p>
-          <p><b>Idade:</b> 27 anos</p>
+      <form id="formCadastro">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" id="nome" required>
         </div>
+        <div class="form-group">
+          <label>Sobrenome</label>
+          <input type="text" id="sobrenome" required>
+        </div>
+        <div class="form-group">
+          <label>Idade</label>
+          <input type="number" id="idade" required>
+        </div>
+        <div class="form-group">
+          <label>Graduação (faixa)</label>
+          <input type="text" id="graduacao">
+        </div>
+        <div class="form-group">
+          <label>Tempo de treino</label>
+          <input type="text" id="tempoTreino">
+        </div>
+        <div class="form-group">
+          <label>Peso</label>
+          <input type="number" step="0.1" id="peso">
+        </div>
+        <div class="form-group">
+          <label>Altura (cm)</label>
+          <input type="number" id="altura">
+        </div>
+        <div class="form-group">
+          <label>Equipe/Academia</label>
+          <input type="text" id="equipe">
+        </div>
+        <div class="form-group">
+          <label>Objetivo Principal</label>
+          <input type="text" id="objetivo">
+        </div>
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="text" id="telefone">
+        </div>
+        <div class="form-group">
+          <label>Email (opcional)</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-group">
+          <label>Foto de Perfil</label>
+          <input type="file" id="fotoPerfil">
+        </div>
+        <button type="submit">Salvar Cadastro</button>
+      </form>
+    </section>
+
+    <!-- Histórico de Campeonatos -->
+    <section id="campeonatos" class="content-section">
+      <h2>Histórico de Campeonatos</h2>
+      <form id="formCampeonatos">
+        <div class="form-group">
+          <label>Quantos campeonatos já lutou</label>
+          <input type="number" id="qtdCampeonatos">
+        </div>
+        <div class="form-group">
+          <label>Vitórias</label>
+          <input type="number" id="vitorias">
+        </div>
+        <div class="form-group">
+          <label>Derrotas</label>
+          <input type="number" id="derrotas">
+        </div>
+        <div class="form-group">
+          <label>Melhor colocação</label>
+          <input type="text" id="melhorColocacao">
+        </div>
+        <div class="form-group">
+          <label>Última participação (nome + data)</label>
+          <input type="text" id="ultimaParticipacao">
+        </div>
+        <button type="submit">Salvar Histórico</button>
+      </form>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="content-section">
+      <h2>Dashboard do Atleta</h2>
+      <canvas id="grafico"></canvas>
+    </section>    <!-- 📦 Pacote 2 - Dieta Interativa -->
+    <section id="dieta" class="content-section">
+      <h2>Dieta Interativa</h2>
+
+      <!-- Registro diário -->
+      <form id="formDieta">
+        <div class="form-group">
+          <label>Café da manhã</label>
+          <input type="text" id="cafe">
+        </div>
+        <div class="form-group">
+          <label>Almoço</label>
+          <input type="text" id="almoco">
+        </div>
+        <div class="form-group">
+          <label>Jantar</label>
+          <input type="text" id="jantar">
+        </div>
+        <div class="form-group">
+          <label>Lanches</label>
+          <input type="text" id="lanches">
+        </div>
+        <button type="submit">Salvar Refeições</button>
+      </form>
+
+      <!-- Dicas automáticas -->
+      <div id="dicas">
+        <h3>Dicas de Alimentação</h3>
+        <ul>
+          <li>Prefira alimentos naturais ao invés de processados.</li>
+          <li>Beba pelo menos 2 litros de água por dia.</li>
+          <li>Inclua proteínas magras em todas as refeições.</li>
+          <li>Evite frituras e refrigerantes.</li>
+        </ul>
       </div>
-    </div>
-    <div class="card">
-      <h2>Gráfico de Vitórias x Derrotas</h2>
-      <canvas id="graficoVitorias"></canvas>
-    </div>
-  </section>
 
-  <!-- (restante do código original permanece idêntico: treinos, metas, análise, vídeos, chat, contato, footer) -->
-  <!-- Treinos -->
-  <section id="treinos" class="section">
-    <div class="card">
-      <h2>Agenda de Treinos</h2>
-      <ul>
-        <li>Segunda - 19h - Treino técnico</li>
-        <li>Quarta - 19h - Sparring</li>
-        <li>Sexta - 19h - Treino físico</li>
-        <li>Sábado - 10h - Aula coletiva</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Metas -->
-  <section id="metas" class="section">
-    <div class="card">
-      <h2>Minhas Metas</h2>
-      <ul>
-        <li>🏆 Competir no estadual</li>
-        <li>⚡ Melhorar condicionamento físico</li>
-        <li>🥋 Aprender 3 novas finalizações</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Análise -->
-  <section id="analise" class="section">
-    <div class="card">
-      <h2>Análise de Desempenho</h2>
-      <canvas id="treinoChart"></canvas>
-    </div>
-    <div class="card">
-      <h2>Progresso</h2>
-      <canvas id="progressoChart"></canvas>
-    </div>
-  </section>
-
-  <!-- Vídeos -->
-  <section id="videos" class="section">
-    <div class="card">
-      <h2>Aulas</h2>
-      <ul>
-        <li><a href="https://www.youtube.com/watch?v=Y7cKoT0Qx0o" target="_blank">Defesa pessoal</a></li>
-        <li><a href="https://www.youtube.com/watch?v=pHw8MtkG2hU" target="_blank">Finalização arm-lock</a></li>
-        <li><a href="https://www.youtube.com/watch?v=IF2UTK4_EFE" target="_blank">Passagem de guarda</a></li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Chat -->
-  <section id="chat" class="section">
-    <div class="card">
-      <h2>Chat com o Treinador</h2>
-      <div class="chat-box" id="chatBox">
-        <div class="msg bot">👊 Olá atleta, como foi o treino de hoje?</div>
+      <!-- Evolução -->
+      <div id="evolucao">
+        <h3>Evolução Alimentar</h3>
+        <canvas id="graficoDieta"></canvas>
       </div>
-      <div class="chat-input">
-        <input type="text" id="chatInput" placeholder="Escreva sua mensagem...">
-        <button onclick="sendMessage()">Enviar</button>
-      </div>
-    </div>
-  </section>
+    </section>    <!-- Firebase + Lógica -->
+    <script type="module">
+      // Import Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-  <!-- Contato -->
-  <section id="contato" class="section">
-    <div class="card">
-      <h2>Contato</h2>
-      <p>📧 suporte@appdoatleta.com</p>
-      <p>📱 WhatsApp: (51) 99999-0000</p>
-    </div>
-  </section>
+      // Configuração Firebase (aqui você mantém suas chaves originais)
+      const firebaseConfig = {
+        apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
+        authDomain: "vagas-de-emprego-app.firebaseapp.com",
+        projectId: "vagas-de-emprego-app",
+        storageBucket: "vagas-de-emprego-app.appspot.com",
+        messagingSenderId: "301719945007",
+        appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
+        measurementId: "G-JRJBBRWG2R"
+      };
 
-  <footer>
-    <p>© 2025 App do Atleta - Dionatan Wiggers</p>
-  </footer>
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
 
-  <script>
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+      // ========== 📦 PACOTE 1 — Cadastro do Atleta ==========
+      const formCadastro = document.getElementById("formCadastro");
+      formCadastro?.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    // Função Salvar Cadastro
-    function salvarCadastro() {
-      const nome = document.getElementById('nome').value;
-      const sobrenome = document.getElementById('sobrenome').value;
-      const idade = document.getElementById('idade').value;
-      const graduacao = document.getElementById('graduacao').value;
-      const vitorias = parseInt(document.getElementById('vitorias').value || 0);
-      const derrotas = parseInt(document.getElementById('derrotas').value || 0);
-      const fotoFile = document.getElementById('foto').files[0];
+        const nome = document.getElementById("nome").value;
+        const sobrenome = document.getElementById("sobrenome").value;
+        const idade = document.getElementById("idade").value;
+        const graduacao = document.getElementById("graduacao").value;
+        const tempo = document.getElementById("tempo").value;
+        const peso = document.getElementById("peso").value;
+        const altura = document.getElementById("altura").value;
+        const equipe = document.getElementById("equipe").value;
+        const objetivo = document.getElementById("objetivo").value;
+        const telefone = document.getElementById("telefone").value;
+        const email = document.getElementById("email").value;
+        const campeonatos = document.getElementById("campeonatos").value;
+        const vitorias = document.getElementById("vitorias").value;
+        const derrotas = document.getElementById("derrotas").value;
+        const melhorColocacao = document.getElementById("melhorColocacao").value;
+        const ultimaParticipacao = document.getElementById("ultimaParticipacao").value;
 
-      // Atualiza perfil
-      document.getElementById('dadosPerfil').innerHTML = `
-        <p><b>Nome:</b> ${nome} ${sobrenome}</p>
-        <p><b>Faixa:</b> ${graduacao}</p>
-        <p><b>Idade:</b> ${idade} anos</p>
-      `;
+        // Upload da foto
+        const fotoFile = document.getElementById("foto").files[0];
+        let fotoURL = "";
+        if (fotoFile) {
+          const storageRef = ref(storage, "fotos/" + Date.now() + "-" + fotoFile.name);
+          await uploadBytes(storageRef, fotoFile);
+          fotoURL = await getDownloadURL(storageRef);
+        }
 
-      if(fotoFile){
-        const reader = new FileReader();
-        reader.onload = e => { document.getElementById('fotoPerfil').src = e.target.result; };
-        reader.readAsDataURL(fotoFile);
+        const atletaData = {
+          nome, sobrenome, idade, graduacao, tempo, peso, altura,
+          equipe, objetivo, telefone, email,
+          campeonatos, vitorias, derrotas, melhorColocacao, ultimaParticipacao,
+          fotoURL
+        };
+
+        await setDoc(doc(db, "atletas", nome + "_" + sobrenome), atletaData);
+
+        alert("Cadastro salvo com sucesso!");
+      });
+
+      // ========== 📦 PACOTE 2 — Dieta ==========
+      const formDieta = document.getElementById("formDieta");
+      formDieta?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const cafe = document.getElementById("cafe").value;
+        const almoco = document.getElementById("almoco").value;
+        const jantar = document.getElementById("jantar").value;
+        const lanches = document.getElementById("lanches").value;
+
+        const dietaData = {
+          data: new Date().toLocaleDateString("pt-BR"),
+          cafe, almoco, jantar, lanches
+        };
+
+        await setDoc(doc(db, "dietas", Date.now().toString()), dietaData);
+
+        alert("Refeições salvas!");
+        atualizarGraficoDieta();
+      });
+
+      // ========== 📊 GRÁFICOS ==========
+      import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js";
+
+      // Dashboard de vitórias/derrotas
+      function renderGraficoAtleta(vitorias, derrotas) {
+        const ctx = document.getElementById("graficoAtleta");
+        if (!ctx) return;
+
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Vitórias", "Derrotas"],
+            datasets: [{
+              data: [vitorias, derrotas],
+              backgroundColor: ["#4CAF50", "#F44336"]
+            }]
+          }
+        });
       }
 
-      // Atualiza gráfico de vitórias
-      atualizarGrafico(vitorias, derrotas);
-      alert("✅ Cadastro salvo com sucesso!");
-    }
+      // Gráfico da dieta (evolução simples)
+      async function atualizarGraficoDieta() {
+        const ctx = document.getElementById("graficoDieta");
+        if (!ctx) return;
 
-    // Gráfico de vitórias
-    let grafico = new Chart(document.getElementById('graficoVitorias'), {
-      type: 'pie',
-      data: {
-        labels: ['Vitórias', 'Derrotas'],
-        datasets: [{ data: [0,0], backgroundColor: ['#4CAF50','#F44336'] }]
+        // Exemplo de dados (em uma versão avançada, puxamos do Firestore)
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["Dia 1", "Dia 2", "Dia 3"],
+            datasets: [{
+              label: "Adesão à dieta",
+              data: [70, 85, 90],
+              borderColor: "#2196F3",
+              fill: false
+            }]
+          }
+        });
       }
-    });
-
-    function atualizarGrafico(v, d) {
-      grafico.data.datasets[0].data = [v,d];
-      grafico.update();
-    }
-
-    // Gráficos existentes
-    new Chart(document.getElementById('treinoChart'), {
-      type: 'bar',
-      data: { labels: ['Seg', 'Qua', 'Sex', 'Sáb'],
-        datasets: [{ label: 'Horas de treino', data: [2, 3, 1.5, 2.5], backgroundColor: '#FFD700' }] }
-    });
-
-    new Chart(document.getElementById('progressoChart'), {
-      type: 'line',
-      data: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [{ label: 'Performance', data: [10, 20, 35, 50, 65], borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.2)', fill: true, tension: 0.3 }] }
-    });
-
-    // Chat
-    function sendMessage() {
-      const input = document.getElementById('chatInput');
-      const chatBox = document.getElementById('chatBox');
-      const msg = input.value.trim();
-      if(msg !== "") {
-        const userMsg = document.createElement('div');
-        userMsg.className = "msg user";
-        userMsg.textContent = msg;
-        chatBox.appendChild(userMsg);
-        setTimeout(() => {
-          const botMsg = document.createElement('div');
-          botMsg.className = "msg bot";
-          botMsg.textContent = "👍 Boa! Continue focado!";
-          chatBox.appendChild(botMsg);
-          chatBox.scrollTop = chatBox.scrollHeight;
-        }, 1000);
-        input.value = "";
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
