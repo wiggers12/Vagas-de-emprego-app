@@ -13,217 +13,212 @@
       --light: #fff;
       --gray: #f5f5f5;
     }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
+    body{background:var(--gray);color:var(--dark);}
+    header{background:var(--dark);color:var(--light);padding:20px;text-align:center;}
+    header h1{font-size:1.8rem;}
+    main{padding:20px;max-width:1200px;margin:auto;}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-    body { background: var(--gray); color: var(--dark); }
-    header { background: var(--dark); color: var(--light); padding: 20px; text-align: center; }
-    header h1 { font-size: 1.6rem; }
-    main { padding: 20px; }
-
-    section { background: var(--light); padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
-    h2 { margin-bottom: 10px; color: var(--primary); font-size: 1.2rem; }
-
-    .meal { margin-bottom: 10px; }
-    .meal input { margin-right: 5px; }
-    .progress-bar { height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-    .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.4s ease; }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-    .card { padding: 10px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: #fafafa; }
-
-    button { background: var(--primary); color: var(--light); padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #218838; }
+    section{background:var(--light);padding:15px;border-radius:8px;margin-bottom:20px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    h2{margin-bottom:10px;color:var(--primary);font-size:1.3rem;}
+    .progress-bar{height:20px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:10px;}
+    .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.4s ease;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
+    .card{padding:10px;border:1px solid #ddd;border-radius:6px;text-align:center;cursor:pointer;}
+    button{background:var(--primary);color:var(--light);padding:10px 15px;border:none;
+      border-radius:6px;cursor:pointer;margin-top:5px;}
+    button:hover{background:#218838;}
+    input,select{padding:8px;width:100%;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;}
+    table,th,td{border:1px solid #ddd;}
+    th,td{padding:8px;text-align:center;}
+    canvas{max-width:100%;margin:10px 0;}
   </style>
 </head>
 <body>
-  <header>
-    <h1>🍏 Nutrição Esportiva</h1>
-    <p>Seu plano alimentar completo</p>
-  </header>
-  <main>
-    <!-- Cadastro nutricional -->
-    <section>
-      <h2>📋 Cadastro Nutricional</h2>
-      <form id="formCadastro">
-        <input type="text" placeholder="Nome" required><br><br>
-        <input type="number" placeholder="Idade" required><br><br>
-        <input type="number" placeholder="Altura (cm)" required><br><br>
-        <input type="number" placeholder="Peso (kg)" required><br><br>
-        <select required>
-          <option value="">Objetivo</option>
-          <option>Ganho de massa</option>
-          <option>Perda de peso</option>
-          <option>Performance</option>
-          <option>Manutenção</option>
-        </select><br><br>
-        <input type="text" placeholder="Alergias/Restrições"><br><br>
-        <input type="text" placeholder="Preferências Alimentares"><br><br>
-        <button type="submit">Salvar</button>
-      </form>
-    </section>
+<header>
+  <h1>Nutrição Esportiva</h1>
+  <p>Seu painel alimentar completo</p>
+</header>
+<main>
+  <!-- Cadastro -->
+  <section>
+    <h2>📋 Cadastro Nutricional</h2>
+    <form id="formCadastro">
+      <input type="text" id="nome" placeholder="Nome" required>
+      <input type="number" id="idade" placeholder="Idade" required>
+      <input type="number" id="altura" placeholder="Altura (cm)" required>
+      <input type="number" id="peso" placeholder="Peso (kg)" required>
+      <select id="sexo" required>
+        <option value="">Sexo</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+      </select>
+      <select id="atividade" required>
+        <option value="">Nível de atividade</option>
+        <option>Sedentário</option>
+        <option>Moderado</option>
+        <option>Intenso</option>
+      </select>
+      <select id="objetivo" required>
+        <option value="">Objetivo</option>
+        <option>Ganho de massa</option>
+        <option>Perda de peso</option>
+        <option>Manutenção</option>
+        <option>Performance</option>
+      </select>
+      <button type="submit">Salvar Cadastro</button>
+    </form>
+    <p id="resultadoCadastro"></p>
+  </section>
 
-    <!-- Plano alimentar -->
-    <section>
-      <h2>🥗 Plano Alimentar Diário</h2>
-      <div class="meal"><input type="checkbox"> Café da manhã - Ovos, pão integral, fruta</div>
-      <div class="meal"><input type="checkbox"> Lanche da manhã - Iogurte, aveia</div>
-      <div class="meal"><input type="checkbox"> Almoço - Arroz, frango, salada</div>
-      <div class="meal"><input type="checkbox"> Pré-treino - Banana, pasta de amendoim</div>
-      <div class="meal"><input type="checkbox"> Pós-treino - Shake de whey, creatina</div>
-      <div class="meal"><input type="checkbox"> Jantar - Batata doce, peixe</div>
-      <div class="meal"><input type="checkbox"> Ceia - Queijo cottage, chá</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-    </section>
+  <!-- Plano Alimentar -->
+  <section>
+    <h2>🥗 Plano Alimentar Diário</h2>
+    <form id="formRefeicao">
+      <input type="text" id="alimento" placeholder="Alimento">
+      <input type="number" id="calorias" placeholder="Calorias">
+      <input type="number" id="proteina" placeholder="Proteínas (g)">
+      <input type="number" id="carbo" placeholder="Carboidratos (g)">
+      <input type="number" id="gordura" placeholder="Gorduras (g)">
+      <button type="submit">Adicionar</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Alimento</th><th>Calorias</th><th>P</th><th>C</th><th>G</th><th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaRefeicoes"></tbody>
+    </table>
+    <div class="progress-bar"><div class="progress-fill" id="progressRefeicao"></div></div>
+  </section>
 
-    <!-- Controle de calorias -->
-    <section>
-      <h2>🔥 Controle de Calorias</h2>
-      <p>Meta diária: 2500 kcal</p>
-      <div class="progress-bar"><div class="progress-fill" id="caloriasProgress"></div></div>
-      <button onclick="adicionarCalorias(300)">Adicionar 300 kcal</button>
-    </section>
+  <!-- Macros -->
+  <section>
+    <h2>⚡ Macros e Calorias</h2>
+    <canvas id="chartMacros"></canvas>
+    <canvas id="chartCalorias"></canvas>
+  </section>
 
-    <!-- Macros -->
-    <section>
-      <h2>⚡ Macros e Nutrientes</h2>
-      <canvas id="chartMacros"></canvas>
-    </section>
+  <!-- Evolução corporal -->
+  <section>
+    <h2>📈 Evolução Corporal</h2>
+    <canvas id="chartPeso"></canvas>
+    <canvas id="chartMedidas"></canvas>
+  </section>
 
-    <!-- Evolução corporal -->
-    <section>
-      <h2>📈 Evolução Corporal</h2>
-      <canvas id="chartPeso"></canvas>
-      <canvas id="chartMedidas"></canvas>
-    </section>
+  <!-- Hidratação -->
+  <section>
+    <h2>💧 Hidratação</h2>
+    <p id="metaAgua">Meta: 3L/dia</p>
+    <div class="progress-bar"><div class="progress-fill" id="aguaProgress"></div></div>
+    <button onclick="beberAgua()">Beber 250ml</button>
+  </section>
 
-    <!-- Suplementação -->
-    <section>
-      <h2>💊 Suplementação</h2>
-      <div class="grid">
-        <div class="card">Whey Protein - Pós-treino</div>
-        <div class="card">Creatina - 5g/dia</div>
-        <div class="card">BCAA - Durante treino</div>
-        <div class="card">Cafeína - Pré-treino</div>
-        <div class="card">Ômega-3 - Saúde geral</div>
-      </div>
-    </section>
+  <!-- Suplementação -->
+  <section>
+    <h2>💊 Suplementação</h2>
+    <div class="grid" id="listaSuplementos">
+      <div class="card" onclick="toggleCheck(this)">Whey Protein</div>
+      <div class="card" onclick="toggleCheck(this)">Creatina</div>
+      <div class="card" onclick="toggleCheck(this)">BCAA</div>
+      <div class="card" onclick="toggleCheck(this)">Cafeína</div>
+    </div>
+  </section>
 
-    <!-- Hidratação -->
-    <section>
-      <h2>💧 Hidratação</h2>
-      <p>Meta: 3 litros/dia</p>
-      <div class="progress-bar"><div class="progress-fill" id="aguaProgress"></div></div>
-      <button onclick="beberAgua()">Beber 250ml</button>
-    </section>
+  <!-- Receitas -->
+  <section>
+    <h2>🍳 Receitas Fitness</h2>
+    <div class="grid">
+      <div class="card">Panqueca de aveia<br><small>20g proteína</small></div>
+      <div class="card">Shake pós-treino<br><small>30g proteína</small></div>
+      <div class="card">Frango + Batata Doce<br><small>500 kcal</small></div>
+    </div>
+  </section>
 
-    <!-- Receitas -->
-    <section>
-      <h2>🍳 Receitas Fitness</h2>
-      <div class="grid">
-        <div class="card">Panqueca de aveia (250 kcal, 20g proteína)</div>
-        <div class="card">Shake pós-treino (350 kcal, 30g proteína)</div>
-        <div class="card">Frango + batata doce (400 kcal, 35g proteína)</div>
-      </div>
-    </section>
+  <!-- Gamificação -->
+  <section>
+    <h2>🏆 Gamificação</h2>
+    <p>Pontos: <span id="pontos">0</span></p>
+    <p>Conquistas: <span id="conquistas">Nenhuma</span></p>
+  </section>
+</main>
 
-    <!-- Gamificação -->
-    <section>
-      <h2>🏆 Gamificação</h2>
-      <p>Pontos de consistência: <span id="pontos">0</span></p>
-      <p>Conquistas: <span id="conquistas">Nenhuma ainda</span></p>
-    </section>
+<script>
+let refeicoes=[];let agua=0;let pontos=0;
 
-    <!-- Dicas diárias -->
-    <section>
-      <h2>💡 Dica do Dia</h2>
-      <p id="dica">Beba bastante água entre as refeições!</p>
-    </section>
-  </main>
+// Cadastro
+document.getElementById("formCadastro").addEventListener("submit",e=>{
+  e.preventDefault();
+  const nome=document.getElementById("nome").value;
+  const peso=document.getElementById("peso").value;
+  const altura=document.getElementById("altura").value/100;
+  const idade=document.getElementById("idade").value;
+  const sexo=document.getElementById("sexo").value;
+  let imc=(peso/(altura*altura)).toFixed(1);
+  document.getElementById("resultadoCadastro").innerText=`${nome}, seu IMC é ${imc}.`;
+});
 
-  <script>
-    // Refeições e progresso
-    const checkboxes = document.querySelectorAll('.meal input');
-    const progressFill = document.getElementById('progress');
-    checkboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        let checked = document.querySelectorAll('.meal input:checked').length;
-        let percent = (checked / checkboxes.length) * 100;
-        progressFill.style.width = percent + '%';
-        document.getElementById('pontos').textContent = checked * 10;
+// Refeições
+document.getElementById("formRefeicao").addEventListener("submit",e=>{
+  e.preventDefault();
+  let alimento=document.getElementById("alimento").value;
+  let calorias=+document.getElementById("calorias").value;
+  let proteina=+document.getElementById("proteina").value;
+  let carbo=+document.getElementById("carbo").value;
+  let gordura=+document.getElementById("gordura").value;
+  refeicoes.push({alimento,calorias,proteina,carbo,gordura});
+  renderTabela();
+});
 
-        // Conquista
-        if (checked === checkboxes.length) {
-          document.getElementById('conquistas').textContent = "Plano completo concluído!";
-        }
-      });
-    });
+function renderTabela(){
+  let tabela=document.getElementById("tabelaRefeicoes");
+  tabela.innerHTML="";
+  let totalC=0,totalP=0,totalCa=0,totalG=0;
+  refeicoes.forEach((r,i)=>{
+    totalC+=r.calorias;totalP+=r.proteina;totalCa+=r.carbo;totalG+=r.gordura;
+    tabela.innerHTML+=`<tr>
+      <td>${r.alimento}</td><td>${r.calorias}</td><td>${r.proteina}</td>
+      <td>${r.carbo}</td><td>${r.gordura}</td>
+      <td><button onclick="removerRefeicao(${i})">X</button></td></tr>`;
+  });
+  atualizarGraficos(totalC,totalP,totalCa,totalG);
+}
+function removerRefeicao(i){refeicoes.splice(i,1);renderTabela();}
 
-    // Controle de calorias
-    let calorias = 0;
-    function adicionarCalorias(qtd) {
-      calorias += qtd;
-      let percent = (calorias / 2500) * 100;
-      if (percent > 100) percent = 100;
-      document.getElementById('caloriasProgress').style.width = percent + '%';
-    }
+// Hidratação
+function beberAgua(){
+  agua+=0.25;let percent=(agua/3)*100;if(percent>100)percent=100;
+  document.getElementById("aguaProgress").style.width=percent+"%";
+}
 
-    // Chart macros
-    new Chart(document.getElementById('chartMacros'), {
-      type: 'pie',
-      data: {
-        labels: ['Carboidratos', 'Proteínas', 'Gorduras'],
-        datasets: [{
-          data: [50, 30, 20],
-          backgroundColor: ['#007bff', '#28a745', '#ffc107']
-        }]
-      }
-    });
+// Suplementação
+function toggleCheck(el){el.style.background=el.style.background?"":"#c3f7cf";pontos+=5;atualizarPontos();}
 
-    // Evolução peso
-    new Chart(document.getElementById('chartPeso'), {
-      type: 'line',
-      data: {
-        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-        datasets: [{
-          label: 'Peso (kg)',
-          data: [80, 79, 78.5, 78],
-          borderColor: '#28a745',
-          fill: false
-        }]
-      }
-    });
+// Gamificação
+function atualizarPontos(){document.getElementById("pontos").textContent=pontos;
+if(pontos>=50)document.getElementById("conquistas").innerText="Atleta dedicado";}
 
-    // Medidas corporais
-    new Chart(document.getElementById('chartMedidas'), {
-      type: 'bar',
-      data: {
-        labels: ['Cintura', 'Braço', 'BF%'],
-        datasets: [{
-          label: 'Medidas',
-          data: [85, 38, 15],
-          backgroundColor: ['#007bff', '#28a745', '#ffc107']
-        }]
-      }
-    });
+// Gráficos
+let chartMacros=new Chart(document.getElementById("chartMacros"),{
+  type:"pie",data:{labels:["Proteínas","Carbo","Gorduras"],datasets:[{data:[0,0,0],backgroundColor:["#28a745","#007bff","#ffc107"]}]}
+});
+let chartCalorias=new Chart(document.getElementById("chartCalorias"),{
+  type:"bar",data:{labels:["Meta","Consumido"],datasets:[{label:"Calorias",data:[2500,0],backgroundColor:["#007bff","#28a745"]}]}
+});
+let chartPeso=new Chart(document.getElementById("chartPeso"),{
+  type:"line",data:{labels:["Sem1","Sem2","Sem3","Sem4"],datasets:[{label:"Peso",data:[80,79,78,77],borderColor:"#28a745",fill:false}]}
+});
+let chartMedidas=new Chart(document.getElementById("chartMedidas"),{
+  type:"line",data:{labels:["Cintura","Peito","Braço"],datasets:[{label:"Medidas cm",data:[90,100,40],borderColor:"#007bff",fill:false}]}
+});
 
-    // Hidratação
-    let agua = 0;
-    function beberAgua() {
-      agua += 0.25;
-      let percent = (agua / 3) * 100;
-      if (percent > 100) percent = 100;
-      document.getElementById('aguaProgress').style.width = percent + '%';
-    }
-
-    // Dicas diárias
-    const dicas = [
-      "Beba bastante água entre as refeições!",
-      "Inclua proteína em todas as refeições.",
-      "Não fique mais de 3h sem comer.",
-      "Consuma vegetais variados diariamente.",
-      "Durma bem para otimizar os resultados."
-    ];
-    document.getElementById('dica').textContent = dicas[Math.floor(Math.random() * dicas.length)];
-  </script>
+function atualizarGraficos(cal,prot,carbo,gord){
+  chartMacros.data.datasets[0].data=[prot,carbo,gord];chartMacros.update();
+  chartCalorias.data.datasets[0].data=[2500,cal];chartCalorias.update();
+}
+</script>
 </body>
 </html>
