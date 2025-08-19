@@ -7,10 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #007bff;
+      --primary: #FFD700; /* Ouro = campeão */
       --dark: #0d0d0d;
       --light: #ffffff;
-      --accent: #FFD700; /* ouro, cor da vitória */
+      --accent: #ff4141;
     }
 
     * {
@@ -24,93 +24,92 @@
       background: var(--dark);
       color: var(--light);
       text-align: center;
+      overflow: hidden;
     }
 
-    /* SPLASH */
+    /* Splash */
     #splash {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: linear-gradient(135deg, #111, #222);
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       z-index: 9999;
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 3s;
-    }
-
-    #splash h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      animation: zoomIn 1s ease;
-    }
-
-    #splash p {
-      font-size: 1.2rem;
-      color: #ddd;
-      margin-top: 10px;
-      animation: fadeIn 2s ease;
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a, #262626);
+      background-size: 300% 300%;
+      animation: gradientMove 6s infinite, fadeOut 1s ease forwards 4s;
     }
 
     #splash .icon {
-      font-size: 4rem;
-      margin-bottom: 15px;
-      animation: bounce 1.5s infinite;
+      font-size: 5rem;
+      animation: float 3s ease-in-out infinite;
+      text-shadow: 0 0 20px var(--primary), 0 0 40px var(--accent);
+      transform: perspective(500px) rotateX(10deg);
     }
 
-    @keyframes zoomIn {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    #splash h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 15px;
+      background: linear-gradient(90deg, var(--primary), #fff, var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: shine 3s linear infinite;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    #splash p {
+      font-size: 1rem;
+      margin-top: 8px;
+      color: #aaa;
     }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    /* Fundo gradiente em movimento */
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Animações */
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotateY(0deg); }
+      50% { transform: translateY(-20px) rotateY(10deg); }
+    }
+
+    @keyframes shine {
+      from { background-position: -200px; }
+      to { background-position: 200px; }
     }
 
     @keyframes fadeOut {
       to { opacity: 0; visibility: hidden; }
     }
 
-    /* HEADER */
+    /* Header */
     header {
       background: linear-gradient(135deg, #007bff, #00d4ff);
       color: var(--light);
-      padding: 50px 20px;
+      padding: 40px 20px;
       border-bottom-left-radius: 40px;
       border-bottom-right-radius: 40px;
-      animation: fadeInDown 1s ease;
+      margin-top: -20px;
     }
 
     h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      font-weight: 700;
+      font-size: 2rem;
     }
 
-    p {
-      margin: 10px 0 0;
-      font-size: 1.1rem;
-      opacity: 0.9;
-    }
-
-    /* MAIN */
+    /* Main */
     main {
       margin: 40px auto;
-      max-width: 800px;
+      max-width: 900px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 20px;
       padding: 0 20px;
-      animation: fadeInUp 1.2s ease;
     }
 
     a {
@@ -118,37 +117,34 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 30px 20px;
+      padding: 25px 15px;
       background: #1c1c1c;
       color: var(--light);
       text-decoration: none;
       border-radius: 15px;
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: 600;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
       transition: all 0.3s ease;
     }
 
     a:hover {
-      transform: translateY(-5px) scale(1.05);
+      transform: translateY(-6px) scale(1.05);
       background: linear-gradient(135deg, #007bff, #00d4ff);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
     }
 
     a span {
-      font-size: 2rem;
-      margin-bottom: 10px;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
     }
 
-    /* Animações */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Responsivo */
+    @media (max-width: 600px) {
+      #splash h1 { font-size: 1.4rem; }
+      #splash p { font-size: 0.9rem; }
+      .icon { font-size: 3.5rem; }
+      main { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -157,13 +153,13 @@
   <div id="splash">
     <div class="icon">🥋</div>
     <h1>Bem-vindo ao App do Campeão</h1>
-    <p>Jiu-Jitsu e performance no seu máximo</p>
+    <p>Jiu-Jitsu • Força • Disciplina</p>
   </div>
 
   <!-- Conteúdo principal -->
   <header>
     <h1>App do Atleta</h1>
-    <p>Bem-vindo ao seu centro de performance!</p>
+    <p>Seu centro completo de performance</p>
   </header>
   <main>
     <a href="cadastro.html"><span>📋</span>Cadastro</a>
