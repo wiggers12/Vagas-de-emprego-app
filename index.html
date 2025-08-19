@@ -7,11 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #FFD700; /* Ouro = campeão */
       --dark: #0d0d0d;
       --light: #ffffff;
-      --accent: #ff4141;
-      --neon: #00d4ff;
     }
 
     * {
@@ -22,10 +19,16 @@
     }
 
     body {
-      background: var(--dark);
+      background: linear-gradient(135deg, #0d0d0d, #1c1c1c, #262626);
+      background-size: 300% 300%;
       color: var(--light);
       text-align: center;
-      overflow-x: hidden;
+      animation: gradientBG 10s infinite alternate;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
     }
 
     /* Splash */
@@ -38,110 +41,35 @@
       align-items: center;
       flex-direction: column;
       z-index: 9999;
-      background: radial-gradient(circle at center, #111, #000);
+      background: radial-gradient(circle, #111 0%, #000 100%);
       animation: fadeOut 1s ease forwards 4s;
     }
 
     #splash .icon {
-      font-size: 6rem;
-      animation: float 3s ease-in-out infinite, glow 2s alternate infinite;
-      text-shadow: 0 0 20px var(--primary), 0 0 40px var(--accent);
+      font-size: 5rem;
+      animation: float 3s ease-in-out infinite;
+      text-shadow: 0 0 25px #FFD700, 0 0 50px #ff4141;
     }
 
     #splash h1 {
       font-size: 2rem;
-      margin-top: 20px;
       font-weight: 700;
-      background: linear-gradient(90deg, var(--primary), var(--neon), var(--accent));
-      background-clip: text;
+      margin-top: 15px;
+      background: linear-gradient(90deg, #FFD700, #fff, #ff4141);
       -webkit-background-clip: text;
       color: transparent;
       animation: shine 3s linear infinite;
     }
 
     #splash p {
-      font-size: 1rem;
+      font-size: 1.1rem;
       margin-top: 8px;
       color: #aaa;
-    }
-
-    /* Header */
-    header {
-      background: linear-gradient(135deg, var(--accent), var(--primary), var(--neon));
-      background-size: 300% 300%;
-      animation: gradientMove 8s infinite;
-      color: var(--light);
-      padding: 50px 20px;
-      border-bottom-left-radius: 40px;
-      border-bottom-right-radius: 40px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-    }
-
-    header h1 {
-      font-size: 2.5rem;
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
-    }
-
-    header p {
-      margin-top: 8px;
-      font-size: 1.2rem;
-      opacity: 0.9;
-    }
-
-    /* Main */
-    main {
-      margin: 50px auto;
-      max-width: 1000px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 25px;
-      padding: 0 20px;
-    }
-
-    a {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 30px 20px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      color: var(--light);
-      text-decoration: none;
-      font-size: 1.1rem;
-      font-weight: 600;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-      perspective: 1000px;
-    }
-
-    a span {
-      font-size: 2rem;
-      margin-bottom: 10px;
-      text-shadow: 0 0 10px var(--primary), 0 0 15px var(--neon);
-    }
-
-    a:hover {
-      transform: translateY(-10px) rotateX(10deg) rotateY(-10deg) scale(1.05);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.7), 0 0 20px var(--neon);
-    }
-
-    /* Animações */
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-15px); }
-    }
-
-    @keyframes glow {
-      from { text-shadow: 0 0 15px var(--primary), 0 0 30px var(--accent); }
-      to { text-shadow: 0 0 25px var(--neon), 0 0 45px var(--primary); }
     }
 
     @keyframes shine {
@@ -153,12 +81,67 @@
       to { opacity: 0; visibility: hidden; }
     }
 
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #007bff, #00d4ff);
+      color: var(--light);
+      padding: 40px 20px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      margin-top: -20px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+    }
+
+    h1 { font-size: 2rem; }
+
+    /* Main */
+    main {
+      margin: 40px auto;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    a {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 20px;
+      background: #1c1c1c;
+      color: var(--light);
+      text-decoration: none;
+      border-radius: 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
+      perspective: 1000px;
+    }
+
+    a span {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    /* Cores únicas para cada card */
+    a:nth-child(1) { background: linear-gradient(135deg, #ff7eb3, #ff758c); }
+    a:nth-child(2) { background: linear-gradient(135deg, #42e695, #3bb2b8); }
+    a:nth-child(3) { background: linear-gradient(135deg, #f7971e, #ffd200); color: #111; }
+    a:nth-child(4) { background: linear-gradient(135deg, #9d50bb, #6e48aa); }
+    a:nth-child(5) { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+    a:nth-child(6) { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+
+    a:hover {
+      transform: rotateY(10deg) translateY(-8px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    }
+
     /* Responsivo */
     @media (max-width: 600px) {
-      header h1 { font-size: 2rem; }
-      header p { font-size: 1rem; }
-      a { font-size: 0.95rem; padding: 20px; }
-      a span { font-size: 1.6rem; }
+      main { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
