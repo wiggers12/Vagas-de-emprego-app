@@ -10,14 +10,7 @@
       --dark: #0d0d0d;
       --light: #ffffff;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     body {
       background: linear-gradient(135deg, #0d0d0d, #1c1c1c, #262626);
       background-size: 300% 300%;
@@ -25,7 +18,6 @@
       text-align: center;
       animation: gradientBG 10s infinite alternate;
     }
-
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       100% { background-position: 100% 50%; }
@@ -42,15 +34,13 @@
       flex-direction: column;
       z-index: 9999;
       background: radial-gradient(circle, #111 0%, #000 100%);
-      animation: fadeOut 1s ease forwards 4s;
     }
-
+    #splash.hidden { display: none; }
     #splash .icon {
       font-size: 5rem;
       animation: float 3s ease-in-out infinite;
       text-shadow: 0 0 25px #FFD700, 0 0 50px #ff4141;
     }
-
     #splash h1 {
       font-size: 2rem;
       font-weight: 700;
@@ -60,26 +50,13 @@
       color: transparent;
       animation: shine 3s linear infinite;
     }
-
     #splash p {
       font-size: 1.1rem;
       margin-top: 8px;
       color: #aaa;
     }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-
-    @keyframes shine {
-      from { background-position: -200px; }
-      to { background-position: 200px; }
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
+    @keyframes float { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-15px);} }
+    @keyframes shine { from{ background-position: -200px; } to{ background-position: 200px; } }
 
     /* Header */
     header {
@@ -91,7 +68,6 @@
       margin-top: -20px;
       box-shadow: 0 6px 25px rgba(0,0,0,0.6);
     }
-
     h1 { font-size: 2rem; }
 
     /* Main */
@@ -103,36 +79,23 @@
       gap: 25px;
       padding: 0 20px;
     }
-
     a {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
       padding: 30px 20px;
-      background: #1c1c1c;
-      color: var(--light);
-      text-decoration: none;
-      border-radius: 20px;
-      font-size: 1rem;
-      font-weight: 600;
+      background: #1c1c1c; color: var(--light); text-decoration: none;
+      border-radius: 20px; font-size: 1rem; font-weight: 600;
       box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-      transition: all 0.3s ease;
-      perspective: 1000px;
+      transition: all 0.3s ease; perspective: 1000px;
     }
+    a span { font-size: 2rem; margin-bottom: 10px; }
 
-    a span {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    /* Cores únicas para cada card */
-    a:nth-child(1) { background: linear-gradient(135deg, #ff7eb3, #ff758c); }
-    a:nth-child(2) { background: linear-gradient(135deg, #42e695, #3bb2b8); }
-    a:nth-child(3) { background: linear-gradient(135deg, #f7971e, #ffd200); color: #111; }
-    a:nth-child(4) { background: linear-gradient(135deg, #9d50bb, #6e48aa); }
-    a:nth-child(5) { background: linear-gradient(135deg, #1e3c72, #2a5298); }
-    a:nth-child(6) { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+    /* Cores dos cards */
+    a:nth-child(1){ background: linear-gradient(135deg, #ff7eb3, #ff758c); }
+    a:nth-child(2){ background: linear-gradient(135deg, #42e695, #3bb2b8); }
+    a:nth-child(3){ background: linear-gradient(135deg, #f7971e, #ffd200); color:#111; }
+    a:nth-child(4){ background: linear-gradient(135deg, #9d50bb, #6e48aa); }
+    a:nth-child(5){ background: linear-gradient(135deg, #1e3c72, #2a5298); }
+    a:nth-child(6){ background: linear-gradient(135deg, #00c6ff, #0072ff); }
 
     a:hover {
       transform: rotateY(10deg) translateY(-8px) scale(1.05);
@@ -166,5 +129,19 @@
     <a href="analise.html"><span>🎥</span>Análise</a>
     <a href="preparacao.html"><span>💪</span>Preparação Física</a>
   </main>
+
+  <script>
+    // Controla o splash
+    window.addEventListener("load", () => {
+      if(localStorage.getItem("splashShown")){
+        document.getElementById("splash").classList.add("hidden");
+      } else {
+        setTimeout(()=>{ 
+          document.getElementById("splash").classList.add("hidden"); 
+          localStorage.setItem("splashShown", "true");
+        }, 3000); // splash dura 3s
+      }
+    });
+  </script>
 </body>
 </html>
