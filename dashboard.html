@@ -81,6 +81,29 @@
 </head>
 <body>
   <header>
+    <!-- Botão Voltar Flutuante -->
+<a href="index.html" class="btn-voltar">⬅ Voltar</a>
+
+<style>
+  .btn-voltar {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #007bff, #00d4ff);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 9999;
+  }
+  .btn-voltar:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #0056b3, #0094cc);
+  }
+</style>
     <h1>🏆 Dashboard do Atleta</h1>
   </header>
   <div class="container">
