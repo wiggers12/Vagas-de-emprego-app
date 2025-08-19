@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de Performance do Atleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #007bff;
+      --dark: #111;
+      --light: #fff;
+      --gray: #f5f5f5;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+    body { background: var(--gray); color: var(--dark); line-height: 1.6; }
+    header { background: var(--dark); color: var(--light); padding: 20px; text-align: center; }
+    header h1 { font-size: 1.8rem; }
+    main { padding: 20px; }
+    section { background: var(--light); padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
+    h2 { margin-bottom: 10px; color: var(--primary); font-size: 1.3rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .card { padding: 10px; border: 1px solid #ddd; border-radius: 6px; text-align: center; cursor: pointer; }
+    .card:hover { background: #f0f0f0; }
+    button { background: var(--primary); color: var(--light); padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    input, select, textarea { padding: 8px; margin-bottom: 8px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
+    video { width: 100%; border-radius: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Análise de Performance do Atleta</h1>
+    <p>Nutrição • Jiu-Jitsu • Saúde • Performance</p>
+  </header>
+
+  <main>
+
+    <!-- Perfil -->
+    <section>
+      <h2>👤 Perfil do Atleta</h2>
+      <input type="text" placeholder="Nome">
+      <input type="number" placeholder="Idade">
+      <input type="text" placeholder="Faixa (Jiu-Jitsu)">
+      <input type="number" placeholder="Altura (cm)">
+      <input type="number" placeholder="Peso (kg)">
+      <select>
+        <option>Objetivo</option>
+        <option>Ganho de massa</option>
+        <option>Redução de peso</option>
+        <option>Performance</option>
+        <option>Manutenção</option>
+      </select>
+      <button onclick="alert('Perfil salvo!')">Salvar Perfil</button>
+    </section>
+
+    <!-- Nutrição -->
+    <section>
+      <h2>🥗 Nutrição</h2>
+      <canvas id="nutricaoChart"></canvas>
+    </section>
+
+    <!-- Treinos de Jiu-Jitsu -->
+    <section>
+      <h2>🥋 Treinos de Jiu-Jitsu</h2>
+      <div class="grid">
+        <div class="card" onclick="registrarTreino('Guarda')">+ Guarda</div>
+        <div class="card" onclick="registrarTreino('Queda')">+ Queda</div>
+        <div class="card" onclick="registrarTreino('Raspagem')">+ Raspagem</div>
+        <div class="card" onclick="registrarTreino('Finalização')">+ Finalização</div>
+      </div>
+      <canvas id="treinoChart"></canvas>
+    </section>
+
+    <!-- Análise de Lutas -->
+    <section>
+      <h2>🎥 Análise de Lutas</h2>
+      <input type="file" accept="video/*" onchange="carregarVideo(event)">
+      <video id="videoLuta" controls></video>
+      <textarea id="anotacoes" placeholder="Anotações técnicas..."></textarea>
+      <button onclick="salvarAnotacao()">Salvar Anotação</button>
+      <ul id="listaAnotacoes"></ul>
+    </section>
+
+    <!-- Saúde -->
+    <section>
+      <h2>💪 Saúde e Condicionamento</h2>
+      <div class="grid">
+        <div class="card">Sono médio: 7h</div>
+        <div class="card">Água ingerida: 2,5L</div>
+        <div class="card">FC média: 70bpm</div>
+        <div class="card">Resistência: Boa</div>
+      </div>
+      <canvas id="saudeRadar"></canvas>
+    </section>
+
+    <!-- Performance -->
+    <section>
+      <h2>📈 Indicadores de Performance</h2>
+      <canvas id="performanceChart"></canvas>
+    </section>
+
+    <!-- Gamificação -->
+    <section>
+      <h2>🏆 Gamificação</h2>
+      <p>Pontos acumulados: <span id="pontos">0</span></p>
+      <button onclick="ganharPontos()">Completar Desafio</button>
+    </section>
+  </main>
+
+  <script>
+    // Nutrição Chart
+    new Chart(document.getElementById('nutricaoChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Carboidratos', 'Proteínas', 'Gorduras'],
+        datasets: [{ data: [50, 30, 20], backgroundColor: ['#007bff','#28a745','#ffc107'] }]
+      }
+    });
+
+    // Treinos Chart
+    let treinoData = { Guarda: 0, Queda: 0, Raspagem: 0, Finalização: 0 };
+    let treinoChart = new Chart(document.getElementById('treinoChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(treinoData),
+        datasets: [{ label: 'Treinos', data: Object.values(treinoData), backgroundColor: '#007bff' }]
+      }
+    });
+    function registrarTreino(tipo) {
+      treinoData[tipo]++;
+      treinoChart.data.datasets[0].data = Object.values(treinoData);
+      treinoChart.update();
+    }
+
+    // Vídeo de Luta
+    function carregarVideo(e) {
+      let file = e.target.files[0];
+      let url = URL.createObjectURL(file);
+      document.getElementById('videoLuta').src = url;
+    }
+    function salvarAnotacao() {
+      let nota = document.getElementById('anotacoes').value;
+      if(nota.trim() !== "") {
+        let li = document.createElement('li');
+        li.textContent = nota;
+        document.getElementById('listaAnotacoes').appendChild(li);
+        document.getElementById('anotacoes').value = "";
+      }
+    }
+
+    // Saúde Radar
+    new Chart(document.getElementById('saudeRadar'), {
+      type: 'radar',
+      data: {
+        labels: ['Força','Resistência','Flexibilidade','Cardio','Técnica'],
+        datasets: [{ label: 'Nível Atual', data: [7,8,6,7,9], backgroundColor:'rgba(0,123,255,0.3)', borderColor:'#007bff'}]
+      }
+    });
+
+    // Performance Line
+    new Chart(document.getElementById('performanceChart'), {
+      type: 'line',
+      data: {
+        labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+        datasets: [{ label: 'Performance Geral', data: [60,70,75,80], borderColor:'#28a745', fill:false }]
+      }
+    });
+
+    // Gamificação
+    let pontos = 0;
+    function ganharPontos() {
+      pontos += 10;
+      document.getElementById('pontos').textContent = pontos;
+    }
+  </script>
+</body>
+</html>
