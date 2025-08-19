@@ -28,8 +28,8 @@
     .progress-bar { height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 10px; }
     .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.4s ease; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-    .card { padding: 10px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .card { padding: 10px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: #fafafa; }
 
     button { background: var(--primary); color: var(--light); padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; }
     button:hover { background: #218838; }
@@ -37,8 +37,8 @@
 </head>
 <body>
   <header>
-    <h1>Nutrição Esportiva</h1>
-    <p>Plano alimentar completo para atletas</p>
+    <h1>🍏 Nutrição Esportiva</h1>
+    <p>Seu plano alimentar completo</p>
   </header>
   <main>
     <!-- Cadastro nutricional -->
@@ -56,6 +56,8 @@
           <option>Performance</option>
           <option>Manutenção</option>
         </select><br><br>
+        <input type="text" placeholder="Alergias/Restrições"><br><br>
+        <input type="text" placeholder="Preferências Alimentares"><br><br>
         <button type="submit">Salvar</button>
       </form>
     </section>
@@ -73,10 +75,25 @@
       <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
     </section>
 
+    <!-- Controle de calorias -->
+    <section>
+      <h2>🔥 Controle de Calorias</h2>
+      <p>Meta diária: 2500 kcal</p>
+      <div class="progress-bar"><div class="progress-fill" id="caloriasProgress"></div></div>
+      <button onclick="adicionarCalorias(300)">Adicionar 300 kcal</button>
+    </section>
+
     <!-- Macros -->
     <section>
-      <h2>⚡ Macros e Calorias</h2>
+      <h2>⚡ Macros e Nutrientes</h2>
       <canvas id="chartMacros"></canvas>
+    </section>
+
+    <!-- Evolução corporal -->
+    <section>
+      <h2>📈 Evolução Corporal</h2>
+      <canvas id="chartPeso"></canvas>
+      <canvas id="chartMedidas"></canvas>
     </section>
 
     <!-- Suplementação -->
@@ -87,13 +104,8 @@
         <div class="card">Creatina - 5g/dia</div>
         <div class="card">BCAA - Durante treino</div>
         <div class="card">Cafeína - Pré-treino</div>
+        <div class="card">Ômega-3 - Saúde geral</div>
       </div>
-    </section>
-
-    <!-- Evolução corporal -->
-    <section>
-      <h2>📈 Evolução Corporal</h2>
-      <canvas id="chartPeso"></canvas>
     </section>
 
     <!-- Hidratação -->
@@ -108,9 +120,9 @@
     <section>
       <h2>🍳 Receitas Fitness</h2>
       <div class="grid">
-        <div class="card">Panqueca de aveia (20g proteína)</div>
-        <div class="card">Shake pós-treino (30g proteína)</div>
-        <div class="card">Frango com batata doce</div>
+        <div class="card">Panqueca de aveia (250 kcal, 20g proteína)</div>
+        <div class="card">Shake pós-treino (350 kcal, 30g proteína)</div>
+        <div class="card">Frango + batata doce (400 kcal, 35g proteína)</div>
       </div>
     </section>
 
@@ -118,12 +130,18 @@
     <section>
       <h2>🏆 Gamificação</h2>
       <p>Pontos de consistência: <span id="pontos">0</span></p>
-      <p>Conquistas: Nenhuma ainda</p>
+      <p>Conquistas: <span id="conquistas">Nenhuma ainda</span></p>
+    </section>
+
+    <!-- Dicas diárias -->
+    <section>
+      <h2>💡 Dica do Dia</h2>
+      <p id="dica">Beba bastante água entre as refeições!</p>
     </section>
   </main>
 
   <script>
-    // Progresso refeições
+    // Refeições e progresso
     const checkboxes = document.querySelectorAll('.meal input');
     const progressFill = document.getElementById('progress');
     checkboxes.forEach(cb => {
@@ -132,8 +150,22 @@
         let percent = (checked / checkboxes.length) * 100;
         progressFill.style.width = percent + '%';
         document.getElementById('pontos').textContent = checked * 10;
+
+        // Conquista
+        if (checked === checkboxes.length) {
+          document.getElementById('conquistas').textContent = "Plano completo concluído!";
+        }
       });
     });
+
+    // Controle de calorias
+    let calorias = 0;
+    function adicionarCalorias(qtd) {
+      calorias += qtd;
+      let percent = (calorias / 2500) * 100;
+      if (percent > 100) percent = 100;
+      document.getElementById('caloriasProgress').style.width = percent + '%';
+    }
 
     // Chart macros
     new Chart(document.getElementById('chartMacros'), {
@@ -161,14 +193,37 @@
       }
     });
 
+    // Medidas corporais
+    new Chart(document.getElementById('chartMedidas'), {
+      type: 'bar',
+      data: {
+        labels: ['Cintura', 'Braço', 'BF%'],
+        datasets: [{
+          label: 'Medidas',
+          data: [85, 38, 15],
+          backgroundColor: ['#007bff', '#28a745', '#ffc107']
+        }]
+      }
+    });
+
     // Hidratação
     let agua = 0;
     function beberAgua() {
-      agua += 0.25; // 250ml
+      agua += 0.25;
       let percent = (agua / 3) * 100;
       if (percent > 100) percent = 100;
       document.getElementById('aguaProgress').style.width = percent + '%';
     }
+
+    // Dicas diárias
+    const dicas = [
+      "Beba bastante água entre as refeições!",
+      "Inclua proteína em todas as refeições.",
+      "Não fique mais de 3h sem comer.",
+      "Consuma vegetais variados diariamente.",
+      "Durma bem para otimizar os resultados."
+    ];
+    document.getElementById('dica').textContent = dicas[Math.floor(Math.random() * dicas.length)];
   </script>
 </body>
 </html>
