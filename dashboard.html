@@ -6,26 +6,9 @@
   <title>Dashboard do Atleta</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module">
-    // Importando Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // Config Firebase (o mesmo que você usou no cadastro)
-    const firebaseConfig = {
-      apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
-      authDomain: "vagas-de-emprego-app.firebaseapp.com",
-      projectId: "vagas-de-emprego-app",
-      storageBucket: "vagas-de-emprego-app.appspot.com",
-      messagingSenderId: "301719945007",
-      appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
-      measurementId: "G-JRJBBRWG2R"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Função: Carregar dados do atleta (exemplo: doc "atleta1")
+<script type="module">
+    import { db } from "./firebase-utils.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     async function carregarAtleta() {
       const docRef = doc(db, "atletas", "atleta1"); // aqui você pode trocar pelo UID do usuário logado
       const docSnap = await getDoc(docRef);
