@@ -6,34 +6,90 @@
   <title>Dashboard do Atleta</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module">
-    import { db } from "./firebase-utils.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    async function carregarAtleta() {
-     const docRef = doc(db, "atletas", user.uid); // aqui você pode trocar pelo UID do usuário logado
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const dados = docSnap.data();
-        document.getElementById("nome").innerText = dados.nome || "-";
-        document.getElementById("graduacao").innerText = dados.graduacao || "-";
-        document.getElementById("idade").innerText = dados.idade || "-";
-        document.getElementById("peso").innerText = dados.peso || "-";
-        document.getElementById("tecnicas").innerText = dados.tecnicas || 0;
-        document.getElementById("treinos").innerText = dados.treinos || 0;
-        document.getElementById("condicao").innerText = dados.condicao || "N/A";
-        document.getElementById("vitorias").innerText = dados.vitorias || 0;
-
-        // Atualizar gráfico com evolução do peso (se existir no cadastro)
-        if (dados.historicoPeso) {
-          atualizarGrafico(dados.historicoPeso);
-        }
-      } else {
-        console.log("Nenhum dado encontrado!");
-      }
+  <style>
+    body { font-family: 'Montserrat', sans-serif; margin:0; padding:0; background:#f5f5f5; }
+    header { background:#111; color:#FFD700; padding:15px; text-align:center; }
+    .container { padding:20px; }
+    .cards { display:flex; flex-wrap:wrap; gap:15px; margin:20px 0; }
+    .card { background:#fff; padding:20px; border-radius:8px; flex:1; min-width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    canvas { background:#fff; border-radius:8px; margin:20px 0; }
+    .btn-voltar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #007bff, #00d4ff);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 9999;
     }
+    .btn-voltar:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #0056b3, #0094cc);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+    <h1>🏆 Dashboard do Atleta</h1>
+  </header>
 
-    // Gráfico
+  <div class="container">
+    <!-- Resumo -->
+    <section id="resumo">
+      <h2>👤 Resumo</h2>
+      <p><strong>Nome:</strong> <span id="nome">-</span></p>
+      <p><strong>Idade:</strong> <span id="idade">-</span></p>
+      <p><strong>Graduação:</strong> <span id="graduacao">-</span></p>
+      <p><strong>Peso:</strong> <span id="peso">-</span></p>
+      <p><strong>Perfil:</strong> <span id="perfil">-</span></p>
+      <p><strong>Jogo preferido:</strong> <span id="jogo">-</span></p>
+      <p><strong>Títulos:</strong> <span id="titulos">-</span></p>
+    </section>
+
+    <!-- KPIs -->
+    <section class="cards">
+      <div class="card">🥋 Técnicas dominadas: <strong id="tecnicas">0</strong></div>
+      <div class="card">💪 Treinos no mês: <strong id="treinos">0</strong></div>
+      <div class="card">🔥 Condicionamento: <strong id="condicao">N/A</strong></div>
+      <div class="card">🥇 Vitórias: <strong id="vitorias">0</strong></div>
+    </section>
+
+    <!-- Gráfico -->
+    <section>
+      <h2>📊 Evolução Física</h2>
+      <canvas id="graficoPeso" height="100"></canvas>
+    </section>
+
+    <!-- Últimos treinos -->
+    <section>
+      <h2>📅 Últimos Treinos</h2>
+      <ul id="lista-treinos">
+        <li>-</li>
+      </ul>
+    </section>
+
+    <!-- Metas -->
+    <section>
+      <h2>🎯 Metas</h2>
+      <ul id="lista-metas">
+        <li>-</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- Script -->
+  <script type="module">
+    import { auth, db } from "./firebase-utils.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Atualiza gráfico
     function atualizarGrafico(historicoPeso) {
       const ctx = document.getElementById('graficoPeso');
       new Chart(ctx, {
@@ -51,86 +107,67 @@
       });
     }
 
-    window.onload = carregarAtleta;
+    // Carregar atleta do Firestore
+    async function carregarAtleta(uid) {
+      const ref = doc(db, "atletas", uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const d = snap.data();
+
+        // Dados básicos
+        document.getElementById("nome").innerText = d.nome || "-";
+        document.getElementById("idade").innerText = d.idade || "-";
+        document.getElementById("graduacao").innerText = d.graduacao || "-";
+        document.getElementById("peso").innerText = d.peso || "-";
+        document.getElementById("perfil").innerText = d.perfil || "-";
+        document.getElementById("jogo").innerText = d.jogo || "-";
+        document.getElementById("titulos").innerText = d.titulos || "-";
+
+        // KPIs
+        document.getElementById("tecnicas").innerText = d.tecnicas || 0;
+        document.getElementById("treinos").innerText = d.treinos || 0;
+        document.getElementById("condicao").innerText = d.condicao || "N/A";
+        document.getElementById("vitorias").innerText = d.vitorias || 0;
+
+        // Histórico de peso
+        if (d.historicoPeso) atualizarGrafico(d.historicoPeso);
+
+        // Últimos treinos
+        if (d.ultimosTreinos) {
+          const lista = document.getElementById("lista-treinos");
+          lista.innerHTML = "";
+          d.ultimosTreinos.forEach(t => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            lista.appendChild(li);
+          });
+        }
+
+        // Metas
+        if (d.metas) {
+          const lista = document.getElementById("lista-metas");
+          lista.innerHTML = "";
+          d.metas.forEach(m => {
+            const li = document.createElement("li");
+            li.textContent = m;
+            lista.appendChild(li);
+          });
+        }
+
+      } else {
+        console.log("❌ Nenhum dado encontrado para este atleta");
+      }
+    }
+
+    // Escuta login e carrega dados
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        carregarAtleta(user.uid);
+      } else {
+        console.log("Usuário não logado.");
+      }
+    });
   </script>
-  <style>
-    body { font-family: 'Montserrat', sans-serif; margin:0; padding:0; background:#f5f5f5; }
-    header { background:#111; color:#FFD700; padding:15px; text-align:center; }
-    .container { padding:20px; }
-    .cards { display:flex; flex-wrap:wrap; gap:15px; margin:20px 0; }
-    .card { background:#fff; padding:20px; border-radius:8px; flex:1; min-width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    canvas { background:#fff; border-radius:8px; margin:20px 0; }
-  </style>
-</head>
-<body>
-  <header>
-    <!-- Botão Voltar Flutuante -->
-<a href="index.html" class="btn-voltar">⬅ Voltar</a>
-
-<style>
-  .btn-voltar {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: linear-gradient(135deg, #007bff, #00d4ff);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
-    z-index: 9999;
-  }
-  .btn-voltar:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #0056b3, #0094cc);
-  }
-</style>
-    <h1>🏆 Dashboard do Atleta</h1>
-  </header>
-  <div class="container">
-    <!-- Resumo -->
-    <section id="resumo">
-      <h2>👤 Resumo</h2>
-      <p><strong>Nome:</strong> <span id="nome">-</span></p>
-      <p><strong>Graduação:</strong> <span id="graduacao">-</span></p>
-      <p><strong>Idade:</strong> <span id="idade">-</span></p>
-      <p><strong>Peso:</strong> <span id="peso">-</span></p>
-    </section>
-
-    <!-- KPIs -->
-    <section class="cards">
-      <div class="card">🥋 Técnicas dominadas: <strong id="tecnicas">0</strong></div>
-      <div class="card">💪 Treinos no mês: <strong id="treinos">0</strong></div>
-      <div class="card">🔥 Condicionamento: <strong id="condicao">N/A</strong></div>
-      <div class="card">🥇 Vitórias: <strong id="vitorias">0</strong></div>
-    </section>
-
-    <!-- Gráficos -->
-    <section>
-      <h2>📊 Evolução Física</h2>
-      <canvas id="graficoPeso" height="100"></canvas>
-    </section>
-
-    <!-- Últimos treinos -->
-    <section>
-      <h2>📅 Últimos Treinos</h2>
-      <ul>
-        <li>12/08 – Sparring, foco em guarda aberta</li>
-        <li>10/08 – Drill: raspagem + arm-lock</li>
-        <li>08/08 – Condicionamento + quedas</li>
-      </ul>
-    </section>
-
-    <!-- Metas -->
-    <section>
-      <h2>🎯 Metas</h2>
-      <ul>
-        <li>Dominar 3 novas raspagens até setembro</li>
-        <li>Competir no estadual de outubro</li>
-      </ul>
-    </section>
-  </div>
 </body>
 </html>
