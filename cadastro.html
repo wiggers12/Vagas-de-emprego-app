@@ -3,37 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App do Atleta - Jiu-Jitsu</title>
+  <title>Cadastro do Atleta - Jiu-Jitsu</title>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script type="module">
-    // Importa os módulos Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
       authDomain: "vagas-de-emprego-app.firebaseapp.com",
       projectId: "vagas-de-emprego-app",
-      storageBucket: "vagas-de-emprego-app.appspot.com", // corrigido
+      storageBucket: "vagas-de-emprego-app.appspot.com",
       messagingSenderId: "301719945007",
       appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
       measurementId: "G-JRJBBRWG2R"
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Enviar cadastro para Firestore
     async function salvarCadastro(e) {
       e.preventDefault();
 
       const formData = {
         nome: document.getElementById("nome").value,
         idade: document.getElementById("idade").value,
-        sexo: document.getElementById("sexo").value,
+        sexo: document.querySelector('input[name="sexo"]:checked')?.value || "",
         cpf: document.getElementById("cpf").value,
         telefone: document.getElementById("telefone").value,
         email: document.getElementById("email").value,
@@ -49,7 +45,7 @@
         suplementos: document.getElementById("suplementos").value,
         historico: document.getElementById("historico").value,
         lesoes: document.getElementById("lesoes").value,
-        objetivos: document.getElementById("objetivos").value,
+        objetivos: document.querySelector('input[name="objetivo"]:checked')?.value || "",
         dataCadastro: new Date().toISOString()
       };
 
@@ -67,133 +63,173 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Montserrat', sans-serif;
       margin: 0;
-      padding: 0;
-      background: #111;
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     header {
       background: #FFD700;
       color: #111;
       text-align: center;
       padding: 20px;
+      font-weight: bold;
     }
     section {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 20px auto;
       padding: 20px;
-      background: #222;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
     h2, h3 {
       color: #FFD700;
+      margin-bottom: 10px;
     }
     form {
       display: grid;
       gap: 15px;
     }
-    input, select, textarea {
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      width: 100%;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
     }
-    button {
+    input, select, textarea {
       padding: 12px;
       border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      width: 100%;
+      outline: none;
+      background: #1e1e1e;
+      color: #fff;
+    }
+    input:focus, textarea:focus, select:focus {
+      border: 2px solid #FFD700;
+    }
+    .radio-group {
+      display: flex;
+      gap: 15px;
+    }
+    .radio-group label {
+      background: #1e1e1e;
+      padding: 10px 15px;
       border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .radio-group input {
+      display: none;
+    }
+    .radio-group input:checked + label {
       background: #FFD700;
       color: #111;
       font-weight: bold;
+    }
+    button {
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #FFD700, #ffea80);
+      color: #111;
+      font-weight: bold;
       cursor: pointer;
+      font-size: 18px;
     }
     button:hover {
-      background: #fff;
+      background: linear-gradient(135deg, #fff, #FFD700);
+    }
+    .btn-voltar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: #FFD700;
       color: #111;
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
+    .btn-voltar:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>🥋 App do Atleta - Jiu-Jitsu</h1>
-    <p>Controle completo de cadastro, performance e evolução</p>
+    <h1>🥋 Cadastro do Atleta</h1>
+    <p>Complete suas informações para iniciar sua jornada</p>
   </header>
-<!-- Botão Voltar Flutuante -->
-<a href="index.html" class="btn-voltar">⬅ Voltar</a>
 
-<style>
-  .btn-voltar {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: linear-gradient(135deg, #007bff, #00d4ff);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
-    z-index: 9999;
-  }
-  .btn-voltar:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #0056b3, #0094cc);
-  }
-</style>
+  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+
   <section>
-    <h2>Cadastro do Atleta</h2>
+    <h2>Dados Pessoais</h2>
     <form onsubmit="salvarCadastro(event)">
-      <!-- Dados Pessoais -->
-      <h3>Dados Pessoais</h3>
       <input id="nome" type="text" placeholder="Nome Completo" required>
-      <input id="idade" type="number" placeholder="Idade" required>
-      <select id="sexo">
-        <option>Masculino</option>
-        <option>Feminino</option>
-        <option>Outro</option>
-      </select>
-      <input id="cpf" type="text" placeholder="CPF">
+      <div class="grid-2">
+        <input id="idade" type="number" placeholder="Idade" required>
+        <input id="cpf" type="text" placeholder="CPF">
+      </div>
+      <div class="radio-group">
+        <input type="radio" id="masc" name="sexo" value="Masculino">
+        <label for="masc">Masculino</label>
+        <input type="radio" id="fem" name="sexo" value="Feminino">
+        <label for="fem">Feminino</label>
+        <input type="radio" id="outro" name="sexo" value="Outro">
+        <label for="outro">Outro</label>
+      </div>
       <input id="telefone" type="tel" placeholder="Telefone/WhatsApp">
       <input id="email" type="email" placeholder="E-mail">
 
-      <!-- Graduação -->
       <h3>Graduação</h3>
       <select id="faixa">
-        <option>Branca</option>
-        <option>Azul</option>
-        <option>Roxa</option>
-        <option>Marrom</option>
-        <option>Preta</option>
+        <option style="color:white; background:#fff;">Branca</option>
+        <option style="color:white; background:#0000ff;">Azul</option>
+        <option style="color:white; background:#800080;">Roxa</option>
+        <option style="color:white; background:#964B00;">Marrom</option>
+        <option style="color:white; background:#000;">Preta</option>
       </select>
       <input id="academia" type="text" placeholder="Professor/Academia">
       <input id="tempo" type="number" placeholder="Tempo de treino (anos)">
 
-      <!-- Dados Físicos -->
       <h3>Dados Físicos</h3>
-      <input id="peso" type="number" placeholder="Peso (kg)">
-      <input id="altura" type="number" placeholder="Altura (cm)">
+      <div class="grid-2">
+        <input id="peso" type="number" placeholder="Peso (kg)">
+        <input id="altura" type="number" placeholder="Altura (cm)">
+      </div>
       <input id="gordura" type="number" placeholder="Percentual de gordura (%)">
-      <textarea id="medidas" placeholder="Medidas corporais (ex: bíceps, abdômen, coxa)"></textarea>
+      <textarea id="medidas" placeholder="Medidas corporais"></textarea>
 
-      <!-- Nutrição -->
-      <h3>Informações Nutricionais</h3>
+      <h3>Nutrição</h3>
       <textarea id="dieta" placeholder="Tipo de dieta"></textarea>
       <textarea id="restricoes" placeholder="Restrições alimentares"></textarea>
-      <textarea id="suplementos" placeholder="Suplementação"></textarea>
+      <textarea id="suplementos" placeholder="Suplementos"></textarea>
 
-      <!-- Histórico -->
       <h3>Histórico Esportivo</h3>
       <textarea id="historico" placeholder="Competições e títulos"></textarea>
       <textarea id="lesoes" placeholder="Lesões anteriores"></textarea>
 
-      <!-- Objetivos -->
       <h3>Objetivos</h3>
-      <textarea id="objetivos" placeholder="Quais são seus principais objetivos?"></textarea>
+      <div class="radio-group">
+        <input type="radio" id="praticar" name="objetivo" value="Praticar">
+        <label for="praticar">Praticar</label>
+        <input type="radio" id="competir" name="objetivo" value="Competir">
+        <label for="competir">Competir</label>
+        <input type="radio" id="atleta" name="objetivo" value="Ser Atleta">
+        <label for="atleta">Ser Atleta</label>
+      </div>
 
-      <button type="submit">Salvar Cadastro</button>
+      <button type="submit">💾 Salvar Cadastro</button>
     </form>
   </section>
 </body>
