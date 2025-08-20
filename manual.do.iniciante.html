@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual do Iniciante - Jiu-Jitsu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #007bff;
+      --dark: #111;
+      --light: #fff;
+      --gray: #f5f5f5;
+      --accent: #28a745;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
+    body{background:var(--gray);color:var(--dark);}
+    header{background:var(--dark);color:var(--light);padding:20px;text-align:center;}
+    header h1{font-size:1.8rem;}
+    main{padding:20px;max-width:900px;margin:auto;}
+    .card{background:var(--light);padding:15px;border-radius:8px;margin-bottom:20px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    h2{margin-bottom:10px;color:var(--primary);}
+    p,li{line-height:1.5;margin-bottom:8px;}
+    ul{margin:10px 0 10px 20px;}
+    .edit-area{display:none;margin-top:10px;}
+    textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;min-height:80px;}
+    button.edit{background:var(--primary);color:var(--light);border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-top:10px;}
+    button.edit:hover{background:#0056b3;}
+    .btn-voltar{display:block;margin:20px auto;padding:12px 18px;background:var(--accent);
+      color:var(--light);text-decoration:none;border-radius:8px;text-align:center;width:200px;}
+    .btn-voltar:hover{background:#1e7e34;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🥋 Manual do Iniciante no Jiu-Jitsu</h1>
+    <p>Tudo que você precisa saber antes de começar sua jornada.</p>
+  </header>
+
+  <main>
+    <!-- História -->
+    <div class="card">
+      <h2>📖 História do Jiu-Jitsu</h2>
+      <p>O Jiu-Jitsu tem origem nas artes marciais japonesas, mas ganhou identidade própria no Brasil, 
+      principalmente através da família Gracie, que difundiu o esporte pelo mundo. 
+      Hoje é uma das artes marciais mais praticadas e reconhecidas mundialmente.</p>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Edite ou adicione mais informações sobre a história...</textarea></div>
+    </div>
+
+    <!-- Introdução -->
+    <div class="card">
+      <h2>📘 Introdução</h2>
+      <p>O Jiu-Jitsu é uma arte marcial que desenvolve disciplina, respeito, autodefesa e condicionamento físico. 
+      Este manual foi criado para ajudar iniciantes a dar os primeiros passos da forma correta.</p>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione novas informações da introdução...</textarea></div>
+    </div>
+
+    <!-- Primeiros Passos -->
+    <div class="card">
+      <h2>🚀 Primeiros Passos</h2>
+      <ul>
+        <li>Conheça o Jiu-Jitsu e seus benefícios.</li>
+        <li>Defina sua motivação: saúde, defesa pessoal, hobby ou competição.</li>
+        <li>Pesquise sobre academias na sua região.</li>
+      </ul>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione dicas sobre primeiros passos...</textarea></div>
+    </div>
+
+    <!-- Academia -->
+    <div class="card">
+      <h2>🏫 Escolha da Academia</h2>
+      <ul>
+        <li>Pesquise academias próximas à sua região.</li>
+        <li>Verifique a experiência do professor e a filiação da equipe.</li>
+        <li>Visite a academia e observe o ambiente.</li>
+        <li>Converse com os alunos para saber suas experiências.</li>
+      </ul>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione observações sobre academias...</textarea></div>
+    </div>
+
+    <!-- Kimono -->
+    <div class="card">
+      <h2>🥋 Kimono de Jiu-Jitsu</h2>
+      <ul>
+        <li><b>Melhores marcas:</b> Vulkan, Keiko, KVRA, Atama, Koral.</li>
+        <li><b>Tipos:</b> Competição, treino leve, kimono infantil.</li>
+        <li><b>Tamanhos:</b> A0 até A5 (dependendo de peso e altura).</li>
+        <li><b>Cuidados:</b> Lavar após treino, não usar água quente, secar à sombra.</li>
+      </ul>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione informações sobre kimonos...</textarea></div>
+    </div>
+
+    <!-- Objetivos -->
+    <div class="card">
+      <h2>🎯 Objetivos no Jiu-Jitsu</h2>
+      <ul>
+        <li><b>Praticante:</b> saúde, disciplina e hobby.</li>
+        <li><b>Competidor:</b> foco em campeonatos.</li>
+        <li><b>Atleta profissional:</b> dedicação máxima ao esporte.</li>
+      </ul>
+      <p>Sua escolha influencia na academia, frequência e preparação física.</p>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione observações sobre objetivos...</textarea></div>
+    </div>
+
+    <!-- Regras -->
+    <div class="card">
+      <h2>📜 Regras do Jiu-Jitsu</h2>
+      <ul>
+        <li>Início em pé, podendo puxar para guarda.</li>
+        <li>Pontuação: 2 (queda/raspagem), 3 (passagem de guarda), 4 (montada/costas).</li>
+        <li>Proibido golpes traumáticos ou chaves perigosas (dependendo da faixa).</li>
+        <li>Vitória por pontos, finalização ou desclassificação.</li>
+      </ul>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione observações sobre regras...</textarea></div>
+    </div>
+
+    <!-- Regras Tatame -->
+    <div class="card">
+      <h2>🤝 Regras de Conduta no Tatame</h2>
+      <ul>
+        <li>Cumprimente sempre professor e colegas.</li>
+        <li>Respeite hierarquia de faixas.</li>
+        <li>Use kimono limpo e unhas cortadas.</li>
+        <li>Não treine doente.</li>
+        <li>Não use calçados no tatame.</li>
+        <li>Siga instruções do professor.</li>
+        <li>Respeite colegas, sem força excessiva.</li>
+      </ul>
+      <button class="edit" onclick="toggleEdit(this)">Editar</button>
+      <div class="edit-area"><textarea>Adicione observações sobre conduta...</textarea></div>
+    </div>
+
+    <!-- Anotações -->
+    <div class="card">
+      <h2>📝 Suas Anotações</h2>
+      <textarea placeholder="Adicione suas observações pessoais aqui..."></textarea>
+    </div>
+
+    <!-- Voltar -->
+    <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+  </main>
+
+  <script>
+    function toggleEdit(btn){
+      const area = btn.nextElementSibling;
+      area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>
