@@ -125,6 +125,7 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -138,10 +139,26 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let userUID = null;
+
+    // Login anônimo
+    signInAnonymously(auth).catch(err => console.error(err));
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) userUID = user.uid;
+    });
+
+    // Salvar dados
     document.getElementById("formCadastro").addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      if (!userUID) {
+        alert("❌ Usuário não autenticado. Tente novamente.");
+        return;
+      }
 
       const dados = {
         nome: nome.value,
@@ -162,7 +179,7 @@
       };
 
       try {
-        await setDoc(doc(db, "atletas", dados.nome), dados);
+        await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
         alert("✅ Cadastro salvo com sucesso!");
       } catch (err) {
         console.error("Erro ao salvar:", err);
