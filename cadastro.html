@@ -134,7 +134,7 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 🔥 Configuração do Firebase - seu projeto
+    // 🔥 Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
       authDomain: "vagas-de-emprego-app.firebaseapp.com",
@@ -145,38 +145,36 @@
       measurementId: "G-JRJBBRWG2R"
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let userUID = null;
 
-    // Ativar/Desativar edição
+    // Função editar (habilita/desabilita os campos)
     function editar() {
       const campos = document.querySelectorAll("#formCadastro input, #formCadastro select, #formCadastro textarea");
-      campos.forEach(campo => {
-        campo.disabled = !campo.disabled;
-      });
+      campos.forEach(campo => campo.disabled = !campo.disabled);
     }
     window.editar = editar; // expõe para botão
 
     // Login anônimo
-    signInAnonymously(auth).then(() => {
-      console.log("Login anônimo bem-sucedido!");
-    });
+    signInAnonymously(auth).catch(err => console.error("Erro ao logar:", err));
 
-    // Escutar autenticação
-    onAuthStateChanged(auth, (user) => {
+    // Escuta autenticação
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         userUID = user.uid;
-        carregarDados();
+        console.log("UID:", userUID);
+        await carregarDados();
+        editar(); // começa bloqueado
       }
     });
 
-    // Salvar no Firestore
+    // Salvar
     document.getElementById("formCadastro").addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (!userUID) return alert("Erro: usuário não autenticado");
 
       const dados = {
         nome: document.getElementById("nome").value,
@@ -196,23 +194,33 @@
         objetivos: document.getElementById("objetivos").value
       };
 
-      await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
-      alert("✅ Informações salvas com sucesso!");
+      try {
+        await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
+        alert("✅ Informações salvas com sucesso!");
+        editar(); // bloqueia de novo
+      } catch (err) {
+        console.error("Erro ao salvar:", err);
+        alert("❌ Erro ao salvar dados");
+      }
     });
 
-    // Carregar do Firestore
+    // Carregar
     async function carregarDados() {
       if (!userUID) return;
-      const snap = await getDoc(doc(db, "atletas", userUID));
-      if (snap.exists()) {
-        const dados = snap.data();
-        Object.keys(dados).forEach(key => {
-          if (document.getElementById(key)) {
-            document.getElementById(key).value = dados[key];
+      try {
+        const snap = await getDoc(doc(db, "atletas", userUID));
+        if (snap.exists()) {
+          const dados = snap.data();
+          for (const key in dados) {
+            if (document.getElementById(key)) {
+              document.getElementById(key).value = dados[key];
+            }
           }
-        });
+        }
+      } catch (err) {
+        console.error("Erro ao carregar:", err);
       }
-      editar(); // começa como leitura
     }
   </script>
 </body>
+</html>
