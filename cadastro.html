@@ -3,234 +3,210 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro do Atleta - Jiu-Jitsu</title>
+  <title>Cadastro do Atleta - App do Campeão</title>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
-      authDomain: "vagas-de-emprego-app.firebaseapp.com",
-      projectId: "vagas-de-emprego-app",
-      storageBucket: "vagas-de-emprego-app.appspot.com",
-      messagingSenderId: "301719945007",
-      appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
-      measurementId: "G-JRJBBRWG2R"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function salvarCadastro(e) {
-      e.preventDefault();
-
-      const formData = {
-        nome: document.getElementById("nome").value,
-        idade: document.getElementById("idade").value,
-        sexo: document.querySelector('input[name="sexo"]:checked')?.value || "",
-        cpf: document.getElementById("cpf").value,
-        telefone: document.getElementById("telefone").value,
-        email: document.getElementById("email").value,
-        faixa: document.getElementById("faixa").value,
-        academia: document.getElementById("academia").value,
-        tempo: document.getElementById("tempo").value,
-        peso: document.getElementById("peso").value,
-        altura: document.getElementById("altura").value,
-        gordura: document.getElementById("gordura").value,
-        medidas: document.getElementById("medidas").value,
-        dieta: document.getElementById("dieta").value,
-        restricoes: document.getElementById("restricoes").value,
-        suplementos: document.getElementById("suplementos").value,
-        historico: document.getElementById("historico").value,
-        lesoes: document.getElementById("lesoes").value,
-        objetivos: document.querySelector('input[name="objetivo"]:checked')?.value || "",
-        dataCadastro: new Date().toISOString()
-      };
-
-      try {
-        await addDoc(collection(db, "atletas"), formData);
-        alert("✅ Cadastro salvo com sucesso!");
-        window.location.href = "dashboard.html";
-      } catch (error) {
-        alert("❌ Erro ao salvar: " + error);
-      }
-    }
-
-    window.salvarCadastro = salvarCadastro;
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
       margin: 0;
-      background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+      padding: 0;
+      background: linear-gradient(135deg, #0d0d0d, #1c1c1c);
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
     }
     header {
-      background: #FFD700;
+      background: linear-gradient(90deg, #FFD700, #ff9500);
       color: #111;
       text-align: center;
-      padding: 20px;
-      font-weight: bold;
+      padding: 25px;
+      border-bottom: 5px solid #333;
     }
+    header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+    header p { font-size: 16px; margin: 5px 0 0; }
     section {
-      max-width: 1000px;
+      max-width: 900px;
       margin: 20px auto;
       padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     }
-    h2, h3 {
-      color: #FFD700;
-      margin-bottom: 10px;
-    }
-    form {
-      display: grid;
-      gap: 15px;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
+    h2 { color: #FFD700; margin-bottom: 10px; }
+    form { display: grid; gap: 15px; }
     input, select, textarea {
       padding: 12px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 16px;
       width: 100%;
-      outline: none;
-      background: #1e1e1e;
+      background: #2a2a2a;
       color: #fff;
     }
-    input:focus, textarea:focus, select:focus {
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      background: #333;
       border: 2px solid #FFD700;
     }
-    .radio-group {
-      display: flex;
-      gap: 15px;
-    }
-    .radio-group label {
-      background: #1e1e1e;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .radio-group input {
-      display: none;
-    }
-    .radio-group input:checked + label {
-      background: #FFD700;
-      color: #111;
-      font-weight: bold;
-    }
+    input::placeholder, textarea::placeholder { color: #aaa; }
+    .buttons { display: flex; gap: 10px; }
     button {
-      padding: 15px;
+      flex: 1;
+      padding: 14px;
       border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #FFD700, #ffea80);
-      color: #111;
+      border-radius: 8px;
       font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
-      font-size: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    button:hover {
-      background: linear-gradient(135deg, #fff, #FFD700);
-    }
+    button:hover { transform: translateY(-3px); }
+    .btn-salvar { background: linear-gradient(135deg, #FFD700, #ff9500); color: #111; }
+    .btn-editar { background: linear-gradient(135deg, #007bff, #00d4ff); color: #fff; }
     .btn-voltar {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: #FFD700;
-      color: #111;
-      padding: 10px 18px;
-      border-radius: 50px;
-      font-weight: bold;
-      text-decoration: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
-      z-index: 9999;
-    }
-    .btn-voltar:hover {
-      transform: scale(1.1);
+      display: block; margin: 20px auto; text-align: center;
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      color: #fff; padding: 12px 20px; border-radius: 50px;
+      font-weight: bold; text-decoration: none; width: 150px;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>🥋 Cadastro do Atleta</h1>
-    <p>Complete suas informações para iniciar sua jornada</p>
+    <p>Organize suas informações no Jiu-Jitsu</p>
   </header>
-
-  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
 
   <section>
     <h2>Dados Pessoais</h2>
-    <form onsubmit="salvarCadastro(event)">
-      <input id="nome" type="text" placeholder="Nome Completo" required>
-      <div class="grid-2">
-        <input id="idade" type="number" placeholder="Idade" required>
-        <input id="cpf" type="text" placeholder="CPF">
-      </div>
-      <div class="radio-group">
-        <input type="radio" id="masc" name="sexo" value="Masculino">
-        <label for="masc">Masculino</label>
-        <input type="radio" id="fem" name="sexo" value="Feminino">
-        <label for="fem">Feminino</label>
-        <input type="radio" id="outro" name="sexo" value="Outro">
-        <label for="outro">Outro</label>
-      </div>
-      <input id="telefone" type="tel" placeholder="Telefone/WhatsApp">
-      <input id="email" type="email" placeholder="E-mail">
-
-      <h3>Graduação</h3>
-      <select id="faixa">
-        <option style="color:white; background:#fff;">Branca</option>
-        <option style="color:white; background:#0000ff;">Azul</option>
-        <option style="color:white; background:#800080;">Roxa</option>
-        <option style="color:white; background:#964B00;">Marrom</option>
-        <option style="color:white; background:#000;">Preta</option>
+    <form id="formCadastro">
+      <input type="text" id="nome" placeholder="Nome Completo" required>
+      <input type="number" id="idade" placeholder="Idade" required>
+      <select id="sexo">
+        <option value="">Selecione o sexo</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+        <option>Outro</option>
       </select>
-      <input id="academia" type="text" placeholder="Professor/Academia">
-      <input id="tempo" type="number" placeholder="Tempo de treino (anos)">
+      <input type="tel" id="telefone" placeholder="Telefone/WhatsApp">
+      <input type="email" id="email" placeholder="E-mail">
 
-      <h3>Dados Físicos</h3>
-      <div class="grid-2">
-        <input id="peso" type="number" placeholder="Peso (kg)">
-        <input id="altura" type="number" placeholder="Altura (cm)">
+      <h2>Dados do Jiu-Jitsu</h2>
+      <select id="graduacao" required>
+        <option value="">Graduação</option>
+        <option>Branca</option>
+        <option>Azul</option>
+        <option>Roxa</option>
+        <option>Marrom</option>
+        <option>Preta</option>
+      </select>
+      <input type="number" id="tempo" placeholder="Tempo de treino (anos)">
+      <input type="number" id="titulosCbjj" placeholder="Títulos CBJJ">
+      <input type="number" id="titulosIbjjf" placeholder="Títulos IBJJF">
+
+      <select id="jogo">
+        <option value="">Qual seu jogo?</option>
+        <option>Guardeiro</option>
+        <option>Passador</option>
+        <option>Meio-Guardeiro</option>
+        <option>Completo</option>
+      </select>
+
+      <textarea id="perfil" placeholder="Perfil de atleta (competidor, praticante, etc.)"></textarea>
+      <textarea id="lesoes" placeholder="Lesões"></textarea>
+      <textarea id="limitacoesFisicas" placeholder="Limitações físicas"></textarea>
+      <textarea id="limitacoesTecnicas" placeholder="Limitações técnicas"></textarea>
+      <textarea id="objetivos" placeholder="Objetivo no Jiu-Jitsu"></textarea>
+
+      <div class="buttons">
+        <button type="button" class="btn-editar" onclick="editar()">✏️ Editar</button>
+        <button type="submit" class="btn-salvar">💾 Salvar</button>
       </div>
-      <input id="gordura" type="number" placeholder="Percentual de gordura (%)">
-      <textarea id="medidas" placeholder="Medidas corporais"></textarea>
-
-      <h3>Nutrição</h3>
-      <textarea id="dieta" placeholder="Tipo de dieta"></textarea>
-      <textarea id="restricoes" placeholder="Restrições alimentares"></textarea>
-      <textarea id="suplementos" placeholder="Suplementos"></textarea>
-
-      <h3>Histórico Esportivo</h3>
-      <textarea id="historico" placeholder="Competições e títulos"></textarea>
-      <textarea id="lesoes" placeholder="Lesões anteriores"></textarea>
-
-      <h3>Objetivos</h3>
-      <div class="radio-group">
-        <input type="radio" id="praticar" name="objetivo" value="Praticar">
-        <label for="praticar">Praticar</label>
-        <input type="radio" id="competir" name="objetivo" value="Competir">
-        <label for="competir">Competir</label>
-        <input type="radio" id="atleta" name="objetivo" value="Ser Atleta">
-        <label for="atleta">Ser Atleta</label>
-      </div>
-
-      <button type="submit">💾 Salvar Cadastro</button>
     </form>
   </section>
+
+  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+
+  <script>
+    // Configuração do Firebase (troque pelos dados do seu projeto)
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let userUID = null;
+
+    // Ativar/Desativar edição
+    function editar() {
+      const campos = document.querySelectorAll("#formCadastro input, #formCadastro select, #formCadastro textarea");
+      campos.forEach(campo => {
+        campo.disabled = !campo.disabled;
+      });
+    }
+
+    // Login anônimo
+    auth.signInAnonymously().then(() => {
+      console.log("Login anônimo bem-sucedido!");
+    });
+
+    // Escutar autenticação
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userUID = user.uid;
+        carregarDados();
+      }
+    });
+
+    // Salvar no Firestore
+    document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const dados = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        sexo: document.getElementById("sexo").value,
+        telefone: document.getElementById("telefone").value,
+        email: document.getElementById("email").value,
+        graduacao: document.getElementById("graduacao").value,
+        tempo: document.getElementById("tempo").value,
+        titulosCbjj: document.getElementById("titulosCbjj").value,
+        titulosIbjjf: document.getElementById("titulosIbjjf").value,
+        jogo: document.getElementById("jogo").value,
+        perfil: document.getElementById("perfil").value,
+        lesoes: document.getElementById("lesoes").value,
+        limitacoesFisicas: document.getElementById("limitacoesFisicas").value,
+        limitacoesTecnicas: document.getElementById("limitacoesTecnicas").value,
+        objetivos: document.getElementById("objetivos").value
+      };
+
+      await db.collection("atletas").doc(userUID).set(dados);
+      alert("✅ Informações salvas com sucesso!");
+    });
+
+    // Carregar do Firestore
+    async function carregarDados() {
+      if (!userUID) return;
+      const doc = await db.collection("atletas").doc(userUID).get();
+      if (doc.exists) {
+        const dados = doc.data();
+        Object.keys(dados).forEach(key => {
+          if (document.getElementById(key)) {
+            document.getElementById(key).value = dados[key];
+          }
+        });
+      }
+      editar(); // inicia como leitura
+    }
+  </script>
 </body>
 </html>
