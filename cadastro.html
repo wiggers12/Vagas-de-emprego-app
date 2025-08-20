@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro do Atleta - App do Campeão</title>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -129,21 +128,28 @@
 
   <a href="index.html" class="btn-voltar">⬅ Voltar</a>
 
-  <script>
-    // Configuração do Firebase (troque pelos dados do seu projeto)
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // 🔥 Configuração do Firebase - seu projeto
     const firebaseConfig = {
-  apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
-  authDomain: "vagas-de-emprego-app.firebaseapp.com",
-  projectId: "vagas-de-emprego-app",
-  storageBucket: "vagas-de-emprego-app.appspot.com",
-  messagingSenderId: "301719945007",
-  appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
-  measurementId: "G-JRJBBRWG2R"
-};
-    // Inicializar Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+      apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
+      authDomain: "vagas-de-emprego-app.firebaseapp.com",
+      projectId: "vagas-de-emprego-app",
+      storageBucket: "vagas-de-emprego-app.appspot.com",
+      messagingSenderId: "301719945007",
+      appId: "1:301719945007:web:e2b5141d1fc941bd11ebda",
+      measurementId: "G-JRJBBRWG2R"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     let userUID = null;
 
     // Ativar/Desativar edição
@@ -153,14 +159,15 @@
         campo.disabled = !campo.disabled;
       });
     }
+    window.editar = editar; // expõe para botão
 
     // Login anônimo
-    auth.signInAnonymously().then(() => {
+    signInAnonymously(auth).then(() => {
       console.log("Login anônimo bem-sucedido!");
     });
 
     // Escutar autenticação
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         userUID = user.uid;
         carregarDados();
@@ -189,23 +196,23 @@
         objetivos: document.getElementById("objetivos").value
       };
 
-      await db.collection("atletas").doc(userUID).set(dados);
+      await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
       alert("✅ Informações salvas com sucesso!");
     });
 
     // Carregar do Firestore
     async function carregarDados() {
       if (!userUID) return;
-      const doc = await db.collection("atletas").doc(userUID).get();
-      if (doc.exists) {
-        const dados = doc.data();
+      const snap = await getDoc(doc(db, "atletas", userUID));
+      if (snap.exists()) {
+        const dados = snap.data();
         Object.keys(dados).forEach(key => {
           if (document.getElementById(key)) {
             document.getElementById(key).value = dados[key];
           }
         });
       }
-      editar(); // inicia como leitura
+      editar(); // começa como leitura
     }
   </script>
 </body>
