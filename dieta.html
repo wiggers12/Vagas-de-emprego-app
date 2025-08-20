@@ -273,5 +273,50 @@ function atualizarGraficos(cal,prot,carbo,gord){
   chartComparativo.data.datasets[0].data=[2000,2100,cal,1800,2200];chartComparativo.update();
  
 </script>
+  <!-- 🔗 Firebase Integração -->
+  <script type="module">
+    import { auth, salvarAtleta, getAtleta } from "./firebase-utils.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    let uid = null;
+
+    // Monitora login automático
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        uid = user.uid;
+        // Recupera dados já salvos
+        const dados = await getAtleta(uid);
+        if (dados) {
+          document.getElementById("nome").value = dados.nome || "";
+          document.getElementById("idade").value = dados.idade || "";
+          document.getElementById("faixa").value = dados.faixa || "";
+          document.getElementById("altura").value = dados.altura || "";
+          document.getElementById("peso").value = dados.peso || "";
+          document.getElementById("objetivo").value = dados.objetivo || "";
+        }
+      } else {
+        console.log("⚠️ Nenhum usuário logado.");
+      }
+    });
+
+    // Salvar perfil no Firestore
+    window.salvarPerfil = async () => {
+      if (!uid) {
+        alert("⚠️ Faça login para salvar!");
+        return;
+      }
+      const dados = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        faixa: document.getElementById("faixa").value,
+        altura: document.getElementById("altura").value,
+        peso: document.getElementById("peso").value,
+        objetivo: document.getElementById("objetivo").value,
+      };
+      const ok = await salvarAtleta(uid, dados);
+      if (ok) alert("✅ Perfil salvo com sucesso!");
+      else alert("❌ Erro ao salvar perfil.");
+    };
+  </script>
 </body>
 </html>
