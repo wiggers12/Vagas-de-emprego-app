@@ -63,7 +63,6 @@
     }
     button:hover { transform: translateY(-3px); }
     .btn-salvar { background: linear-gradient(135deg, #FFD700, #ff9500); color: #111; }
-    .btn-editar { background: linear-gradient(135deg, #007bff, #00d4ff); color: #fff; }
     .btn-voltar {
       display: block; margin: 20px auto; text-align: center;
       background: linear-gradient(135deg, #ff4444, #cc0000);
@@ -79,20 +78,18 @@
   </header>
 
   <section>
-    <h2>Dados Pessoais</h2>
+    <h2>Formulário</h2>
     <form id="formCadastro">
       <input type="text" id="nome" placeholder="Nome Completo" required>
       <input type="number" id="idade" placeholder="Idade" required>
-      <select id="sexo">
-        <option value="">Selecione o sexo</option>
+      <select id="sexo" required>
+        <option value="">Sexo</option>
         <option>Masculino</option>
         <option>Feminino</option>
         <option>Outro</option>
       </select>
       <input type="tel" id="telefone" placeholder="Telefone/WhatsApp">
       <input type="email" id="email" placeholder="E-mail">
-
-      <h2>Dados do Jiu-Jitsu</h2>
       <select id="graduacao" required>
         <option value="">Graduação</option>
         <option>Branca</option>
@@ -104,37 +101,33 @@
       <input type="number" id="tempo" placeholder="Tempo de treino (anos)">
       <input type="number" id="titulosCbjj" placeholder="Títulos CBJJ">
       <input type="number" id="titulosIbjjf" placeholder="Títulos IBJJF">
-
       <select id="jogo">
-        <option value="">Qual seu jogo?</option>
+        <option value="">Seu jogo</option>
         <option>Guardeiro</option>
         <option>Passador</option>
         <option>Meio-Guardeiro</option>
         <option>Completo</option>
       </select>
-
-      <textarea id="perfil" placeholder="Perfil de atleta (competidor, praticante, etc.)"></textarea>
+      <textarea id="perfil" placeholder="Perfil de atleta"></textarea>
       <textarea id="lesoes" placeholder="Lesões"></textarea>
       <textarea id="limitacoesFisicas" placeholder="Limitações físicas"></textarea>
       <textarea id="limitacoesTecnicas" placeholder="Limitações técnicas"></textarea>
-      <textarea id="objetivos" placeholder="Objetivo no Jiu-Jitsu"></textarea>
+      <textarea id="objetivos" placeholder="Objetivos"></textarea>
 
       <div class="buttons">
-        <button type="button" class="btn-editar" onclick="editar()">✏️ Editar</button>
         <button type="submit" class="btn-salvar">💾 Salvar</button>
       </div>
     </form>
   </section>
 
-  <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+  <a href="dashboard.html" class="btn-voltar">📊 Ir para Dashboard</a>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 🔥 Configuração do Firebase - seu projeto
     const firebaseConfig = {
       apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
       authDomain: "vagas-de-emprego-app.firebaseapp.com",
@@ -145,75 +138,54 @@
       measurementId: "G-JRJBBRWG2R"
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let userUID = null;
 
-    // Ativar/Desativar edição
-    function editar() {
-      const campos = document.querySelectorAll("#formCadastro input, #formCadastro select, #formCadastro textarea");
-      campos.forEach(campo => {
-        campo.disabled = !campo.disabled;
-      });
-    }
-    window.editar = editar; // expõe para botão
-
     // Login anônimo
-    signInAnonymously(auth).then(() => {
-      console.log("Login anônimo bem-sucedido!");
-    });
+    signInAnonymously(auth).catch(err => console.error(err));
 
-    // Escutar autenticação
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userUID = user.uid;
-        carregarDados();
-      }
+      if (user) userUID = user.uid;
     });
 
-    // Salvar no Firestore
+    // Salvar dados
     document.getElementById("formCadastro").addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      if (!userUID) {
+        alert("❌ Usuário não autenticado. Tente novamente.");
+        return;
+      }
+
       const dados = {
-        nome: document.getElementById("nome").value,
-        idade: document.getElementById("idade").value,
-        sexo: document.getElementById("sexo").value,
-        telefone: document.getElementById("telefone").value,
-        email: document.getElementById("email").value,
-        graduacao: document.getElementById("graduacao").value,
-        tempo: document.getElementById("tempo").value,
-        titulosCbjj: document.getElementById("titulosCbjj").value,
-        titulosIbjjf: document.getElementById("titulosIbjjf").value,
-        jogo: document.getElementById("jogo").value,
-        perfil: document.getElementById("perfil").value,
-        lesoes: document.getElementById("lesoes").value,
-        limitacoesFisicas: document.getElementById("limitacoesFisicas").value,
-        limitacoesTecnicas: document.getElementById("limitacoesTecnicas").value,
-        objetivos: document.getElementById("objetivos").value
+        nome: nome.value,
+        idade: idade.value,
+        sexo: sexo.value,
+        telefone: telefone.value,
+        email: email.value,
+        graduacao: graduacao.value,
+        tempo: tempo.value,
+        titulosCbjj: titulosCbjj.value,
+        titulosIbjjf: titulosIbjjf.value,
+        jogo: jogo.value,
+        perfil: perfil.value,
+        lesoes: lesoes.value,
+        limitacoesFisicas: limitacoesFisicas.value,
+        limitacoesTecnicas: limitacoesTecnicas.value,
+        objetivos: objetivos.value
       };
 
-      await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
-      alert("✅ Informações salvas com sucesso!");
-    });
-
-    // Carregar do Firestore
-    async function carregarDados() {
-      if (!userUID) return;
-      const snap = await getDoc(doc(db, "atletas", userUID));
-      if (snap.exists()) {
-        const dados = snap.data();
-        Object.keys(dados).forEach(key => {
-          if (document.getElementById(key)) {
-            document.getElementById(key).value = dados[key];
-          }
-        });
+      try {
+        await setDoc(doc(db, "atletas", userUID), dados, { merge: true });
+        alert("✅ Cadastro salvo com sucesso!");
+      } catch (err) {
+        console.error("Erro ao salvar:", err);
+        alert("❌ Falha ao salvar, veja o console.");
       }
-      editar(); // começa como leitura
-    }
+    });
   </script>
 </body>
 </html>
