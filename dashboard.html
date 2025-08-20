@@ -10,7 +10,7 @@
     import { db } from "./firebase-utils.js";
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     async function carregarAtleta() {
-      const docRef = doc(db, "atletas", "atleta1"); // aqui você pode trocar pelo UID do usuário logado
+     const docRef = doc(db, "atletas", user.uid); // aqui você pode trocar pelo UID do usuário logado
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
