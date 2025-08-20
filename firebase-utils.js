@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔑 Configuração do Firebase
+// Config Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyC1WaaBD9XXRoMGgiKRU_qTLcQ5CdNHQKs",
   authDomain: "vagas-de-emprego-app.firebaseapp.com",
@@ -14,34 +14,32 @@ const firebaseConfig = {
   measurementId: "G-JRJBBRWG2R"
 };
 
-// 🚀 Inicializa Firebase
+// Inicializa
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 📌 Função: Salvar cadastro
+// 👉 Salvar cadastro do atleta
 export async function salvarAtleta(uid, dados) {
   try {
-    await setDoc(doc(db, "atletas", uid), dados, { merge: true });
+    await setDoc(doc(db, "atletas", uid), dados, { merge: true }); 
+    // se "atletas" não existir, o Firebase cria
+    console.log("✅ Dados salvos no Firestore!");
     return true;
   } catch (e) {
-    console.error("Erro ao salvar:", e);
+    console.error("❌ Erro ao salvar:", e);
     return false;
   }
 }
 
-// 📌 Função: Buscar cadastro
+// 👉 Buscar cadastro do atleta
 export async function getAtleta(uid) {
   try {
     const ref = doc(db, "atletas", uid);
     const snap = await getDoc(ref);
-    if (snap.exists()) {
-      return snap.data();
-    } else {
-      return null;
-    }
+    return snap.exists() ? snap.data() : null;
   } catch (e) {
-    console.error("Erro ao buscar:", e);
+    console.error("❌ Erro ao buscar:", e);
     return null;
   }
 }
